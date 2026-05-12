@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git mv *)",
+      "Bash(git push *)",
+      "Bash(dir \"C:\\\\Users\\\\ices1\\\\web\\\\GreenBrain\\\\DesignPrototype_GreenBrain\\\\src\" /s /b)",
+      "Bash(findstr /v node_modules)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\ices1\\\\web\\\\GreenBrain\\\\DesignPrototype_GreenBrain\\\\src\" -Recurse -File | Where-Object { $_.FullName -notmatch 'node_modules' } | Select-Object -ExpandProperty FullName)",
+      "Bash(not exist *)",
+      "PowerShell(New-Item *)",
+      "Bash(git config *)",
+      "Bash(git update-index *)",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\ices1\\\\web\\\\GreenBrain\\\\.claude\\\\agents\")",
+      "Bash(Out-Null)",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\ices1\\\\web\\\\GreenBrain\\\\.claude\\\\skills\\\\fe-orchestrator\")",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\ices1\\\\web\\\\GreenBrain\\\\.claude\\\\skills\\\\implement-feature\\\\references\")",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\ices1\\\\web\\\\GreenBrain\\\\.claude\\\\skills\\\\pattern-check\")",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\ices1\\\\web\\\\GreenBrain\\\\.claude\\\\skills\\\\prd-qa\\\\references\")",
+      "Bash(Write-Host \"디렉토리 생성 완료\")"
+    ]
+  }
+}
