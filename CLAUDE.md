@@ -13,6 +13,20 @@
 - react-router v7, react-hook-form, shadcn/ui + Radix UI
 - 아이콘: 인라인 SVG 우선 (lucide-react는 `Trash2`만 허용)
 
+## 컴포넌트 구조
+
+```
+components/
+├── icons/
+│   └── OnboardingIcons.tsx   # 온보딩 아이콘 (props: name) — 프로필 설정에서 재사용
+├── ui/
+│   └── button.tsx            # shadcn/ui 버튼
+├── CarbonCard.tsx
+├── EmptyState.tsx
+├── SkeletonCard.tsx
+└── TokenBar.tsx
+```
+
 **디자인 프로토타입**: `../DesignPrototype_GreenBrain` (절대경로: `C:\Users\ices1\web\GreenBrain\DesignPrototype_GreenBrain`)
 → 모든 구현·디자인 작업의 대상 파일이 여기에 있다. 에이전트는 작업 전 반드시 이 경로의 파일을 직접 읽는다.
 

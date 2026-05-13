@@ -2,48 +2,38 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import PublicTransitIcon from '@/components/icons/PublicTransitIcon'
-import CarIcon from '@/components/icons/CarIcon'
-import BikeIcon from '@/components/icons/BikeIcon'
-import WalkIcon from '@/components/icons/WalkIcon'
-import VeganIcon from '@/components/icons/VeganIcon'
-import VegetarianIcon from '@/components/icons/VegetarianIcon'
-import BalancedIcon from '@/components/icons/BalancedIcon'
-import MeatIcon from '@/components/icons/MeatIcon'
-import ApartmentIcon from '@/components/icons/ApartmentIcon'
-import HouseIcon from '@/components/icons/HouseIcon'
-import StudioIcon from '@/components/icons/StudioIcon'
-import SharedIcon from '@/components/icons/SharedIcon'
+import OnboardingIcon from '@/components/icons/OnboardingIcons'
+import type { OnboardingIconName } from '@/components/icons/OnboardingIcons'
 
 const STEPS = [
   {
     title: '주로 사용하는 교통수단은 무엇인가요?',
     description: '일상적으로 가장 자주 이용하는 교통수단을 선택해주세요.',
     options: [
-      { value: 'public', label: '대중교통', icon: <PublicTransitIcon /> },
-      { value: 'car', label: '자가용', icon: <CarIcon /> },
-      { value: 'bike', label: '자전거', icon: <BikeIcon /> },
-      { value: 'walk', label: '도보', icon: <WalkIcon /> },
+      { value: 'public', label: '대중교통', icon: 'publicTransit' as OnboardingIconName },
+      { value: 'car', label: '자가용', icon: 'car' as OnboardingIconName },
+      { value: 'bike', label: '자전거', icon: 'bike' as OnboardingIconName },
+      { value: 'walk', label: '도보', icon: 'walk' as OnboardingIconName },
     ],
   },
   {
     title: '식단 유형은 어떻게 되나요?',
     description: '평소 주로 섭취하는 식단을 선택해주세요.',
     options: [
-      { value: 'vegan', label: '비건', icon: <VeganIcon /> },
-      { value: 'vegetarian', label: '채식 위주', icon: <VegetarianIcon /> },
-      { value: 'balanced', label: '균형 식단', icon: <BalancedIcon /> },
-      { value: 'meat', label: '육식 위주', icon: <MeatIcon /> },
+      { value: 'vegan', label: '비건', icon: 'vegan' as OnboardingIconName },
+      { value: 'vegetarian', label: '채식 위주', icon: 'vegetarian' as OnboardingIconName },
+      { value: 'balanced', label: '균형 식단', icon: 'balanced' as OnboardingIconName },
+      { value: 'meat', label: '육식 위주', icon: 'meat' as OnboardingIconName },
     ],
   },
   {
     title: '주거 형태는 어떻게 되나요?',
     description: '현재 거주하고 계신 주거 형태를 선택해주세요.',
     options: [
-      { value: 'apartment', label: '아파트', icon: <ApartmentIcon /> },
-      { value: 'house', label: '단독주택', icon: <HouseIcon /> },
-      { value: 'studio', label: '원룸/오피스텔', icon: <StudioIcon /> },
-      { value: 'shared', label: '셰어하우스', icon: <SharedIcon /> },
+      { value: 'apartment', label: '아파트', icon: 'apartment' as OnboardingIconName },
+      { value: 'house', label: '단독주택', icon: 'house' as OnboardingIconName },
+      { value: 'studio', label: '원룸/오피스텔', icon: 'studio' as OnboardingIconName },
+      { value: 'shared', label: '셰어하우스', icon: 'shared' as OnboardingIconName },
     ],
   },
 ]
@@ -116,7 +106,7 @@ export default function OnboardingPage() {
                     : 'border-gray-200 hover:border-green-300 hover:bg-gray-50'
                 }`}
               >
-                <span className="text-gray-700 flex-shrink-0">{option.icon}</span>
+                <span className="text-gray-700 flex-shrink-0"><OnboardingIcon name={option.icon} /></span>
                 <span className="font-medium text-gray-900 flex-1">{option.label}</span>
                 {currentValue === option.value && (
                   <span className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
