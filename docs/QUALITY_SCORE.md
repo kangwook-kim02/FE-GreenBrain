@@ -12,6 +12,7 @@
 | 접근성 | D | 일부 label/htmlFor 존재. 포커스 트랩·키보드 내비 미구현 | 2026-05-12 |
 | 타입 안전성 | C | 로컬 인터페이스 정의됨. 공유 타입·Context 타입 미구성 | 2026-05-12 |
 | 에러 핸들링 | D | `alert()` 2곳 (Challenges.tsx, ChallengeModal.tsx) CRITICAL 위반 | 2026-05-12 |
+| 로그인·회원가입 UI (issue #1) | B | react-hook-form 미사용·필드별 에러 없음(FAIL 2건). alert() 없음·로딩 상태·정규식 검증 PASS. | 2026-05-13 |
 
 ## 등급 기준
 

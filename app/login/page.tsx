@@ -2,24 +2,25 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useForm } from 'react-hook-form'
+
+interface LoginForm {
+  email: string
+  password: string
+}
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [serverError, setServerError] = useState('')
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setError('')
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>()
 
-    const form = e.currentTarget
-    const email = (form.elements.namedItem('email') as HTMLInputElement).value
-    const password = (form.elements.namedItem('password') as HTMLInputElement).value
-
-    if (!email || !password) {
-      setError('이메일과 비밀번호를 입력해주세요.')
-      return
-    }
-
+  async function onSubmit(_data: LoginForm) {
+    setServerError('')
     setIsLoading(true)
     // API 연동은 issue #12에서 구현
     setIsLoading(false)
@@ -38,18 +39,24 @@ export default function LoginPage() {
           <p className="text-gray-600">AI 챗봇 탄소 책임 서비스</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               이메일
             </label>
             <input
               id="email"
-              name="email"
               type="email"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
               placeholder="your@email.com"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+              {...register('email', {
+                required: '이메일을 입력해주세요.',
+                pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: '올바른 이메일 형식을 입력해주세요.' },
+              })}
             />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+            )}
           </div>
 
           <div>
@@ -58,16 +65,19 @@ export default function LoginPage() {
             </label>
             <input
               id="password"
-              name="password"
               type="password"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
               placeholder="••••••••"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+              {...register('password', { required: '비밀번호를 입력해주세요.' })}
             />
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
+            )}
           </div>
 
-          {error && (
+          {serverError && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-              {error}
+              {serverError}
             </div>
           )}
 

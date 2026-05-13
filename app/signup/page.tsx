@@ -2,39 +2,31 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useForm } from 'react-hook-form'
 
-function validatePassword(pwd: string) {
-  return pwd.length >= 8 && /[a-z]/.test(pwd) && /[A-Z]/.test(pwd) && /[0-9]/.test(pwd)
+interface SignupForm {
+  email: string
+  password: string
+  confirmPassword: string
 }
+
+const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}$/
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [serverError, setServerError] = useState('')
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setError('')
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<SignupForm>()
 
-    const form = e.currentTarget
-    const email = (form.elements.namedItem('email') as HTMLInputElement).value
-    const password = (form.elements.namedItem('password') as HTMLInputElement).value
-    const confirmPassword = (form.elements.namedItem('confirmPassword') as HTMLInputElement).value
+  const password = watch('password')
 
-    if (!email || !password || !confirmPassword) {
-      setError('모든 필드를 입력해주세요.')
-      return
-    }
-
-    if (!validatePassword(password)) {
-      setError('비밀번호는 최소 8자, 대소문자 및 숫자를 포함해야 합니다.')
-      return
-    }
-
-    if (password !== confirmPassword) {
-      setError('비밀번호가 일치하지 않습니다.')
-      return
-    }
-
+  async function onSubmit(_data: SignupForm) {
+    setServerError('')
     setIsLoading(true)
     // API 연동은 issue #12에서 구현
     setIsLoading(false)
@@ -53,18 +45,24 @@ export default function SignupPage() {
           <p className="text-gray-600">GreenBrain과 함께 탄소 책임을 실천하세요</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               이메일
             </label>
             <input
               id="email"
-              name="email"
               type="email"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
               placeholder="your@email.com"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+              {...register('email', {
+                required: '이메일을 입력해주세요.',
+                pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: '올바른 이메일 형식을 입력해주세요.' },
+              })}
             />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+            )}
           </div>
 
           <div>
@@ -73,11 +71,17 @@ export default function SignupPage() {
             </label>
             <input
               id="password"
-              name="password"
               type="password"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
               placeholder="최소 8자, 대소문자+숫자 혼합"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+              {...register('password', {
+                required: '비밀번호를 입력해주세요.',
+                pattern: { value: PASSWORD_PATTERN, message: '최소 8자, 대소문자 및 숫자를 포함해야 합니다.' },
+              })}
             />
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
+            )}
           </div>
 
           <div>
@@ -86,16 +90,22 @@ export default function SignupPage() {
             </label>
             <input
               id="confirmPassword"
-              name="confirmPassword"
               type="password"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
               placeholder="비밀번호 재입력"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+              {...register('confirmPassword', {
+                required: '비밀번호 확인을 입력해주세요.',
+                validate: (v) => v === password || '비밀번호가 일치하지 않습니다.',
+              })}
             />
+            {errors.confirmPassword && (
+              <p className="mt-1 text-sm text-red-500">{errors.confirmPassword.message}</p>
+            )}
           </div>
 
-          {error && (
+          {serverError && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-              {error}
+              {serverError}
             </div>
           )}
 
