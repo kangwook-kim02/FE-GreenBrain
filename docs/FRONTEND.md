@@ -61,13 +61,16 @@ className="pb-16 sm:pb-0"    // 모바일 탭바 여백
 
 ## 라우팅
 
+Next.js App Router 기반. `react-router` 사용 금지.
+
 ```tsx
-import { useNavigate, Link, useLocation } from "react-router";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-const navigate = useNavigate();
-navigate("/chat");
+const router = useRouter();
+router.push("/chat");
 
-<Link to="/signup" className="text-green-500 hover:text-green-600 font-medium">
+<Link href="/signup" className="text-green-500 hover:text-green-600 font-medium">
   회원가입
 </Link>
 ```
@@ -76,7 +79,7 @@ navigate("/chat");
 
 - **로컬 UI 상태**: `useState`
 - **전역 상태**: `contexts/AppContext.tsx` (예정)
-- **폼 상태**: `react-hook-form` (Login, Signup 전환 예정 — 현재 `useState`)
+- **폼 상태**: `react-hook-form` (Login, Signup 적용 완료)
 
 ## API 호출 패턴
 
@@ -148,7 +151,8 @@ const handleSubmit = async (e: React.FormEvent) => {
 // 1. React
 import { useState, useEffect } from "react";
 // 2. 라우팅
-import { useNavigate, Link } from "react-router";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 // 3. 외부 라이브러리
 import { useForm } from "react-hook-form";
 // 4. 내부 컴포넌트
