@@ -22,7 +22,7 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
     credentials: 'include',
   })
 
-  if (response.status === 401) {
+  if (response.status === 401 && !path.startsWith('/api/auth/')) {
     window.location.href = '/login'
     throw new Error('Unauthorized')
   }

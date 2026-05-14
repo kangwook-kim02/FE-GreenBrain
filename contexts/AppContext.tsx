@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, ReactNode } from 'react'
+import { apiFetch } from '@/lib/api'
 
 interface UserProfile {
   transport_mode: 'car' | 'transit' | 'walk' | 'bike' | 'mixed'
@@ -31,6 +32,7 @@ interface AppContextValue extends AppState {
   setUser: (user: User | null) => void
   setTokens: (tokens: Tokens) => void
   updateRemainingTokens: (remaining: number) => void
+  logout: () => Promise<void>
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -43,8 +45,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setTokens((prev) => ({ ...prev, remaining }))
   }
 
+  async function logout() {
+    try {
+      await apiFetch('/api/auth/logout', { method: 'POST' })
+    } finally {
+      setUser(null)
+      setTokens({ remaining: 150, max: 150 })
+      window.location.href = '/login'
+    }
+  }
+
   return (
-    <AppContext.Provider value={{ user, tokens, setUser, setTokens, updateRemainingTokens }}>
+    <AppContext.Provider
+      value={{ user, tokens, setUser, setTokens, updateRemainingTokens, logout }}
+    >
       {children}
     </AppContext.Provider>
   )

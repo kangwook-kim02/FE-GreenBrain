@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
+import { apiFetch } from '@/lib/api'
 
 interface LoginForm {
   email: string
@@ -10,6 +12,7 @@ interface LoginForm {
 }
 
 export default function LoginPage() {
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [serverError, setServerError] = useState('')
 
@@ -19,11 +22,27 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginForm>()
 
-  async function onSubmit(_data: LoginForm) {
+  async function onSubmit(data: LoginForm) {
     setServerError('')
     setIsLoading(true)
-    // API 연동은 issue #12에서 구현
-    setIsLoading(false)
+    try {
+      await apiFetch('/api/auth/login', {
+        method: 'POST',
+        body: { email: data.email, password: data.password },
+      })
+      router.push('/chat')
+    } catch (err) {
+      const status = (err as { status?: number }).status
+      if (status === 401) {
+        setServerError('이메일 또는 비밀번호가 올바르지 않습니다')
+      } else if (status === 429) {
+        setServerError('로그인 시도 횟수를 초과했습니다')
+      } else {
+        throw err
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -84,7 +103,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-green-500 hover:bg-green-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             {isLoading && (
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
