@@ -2,16 +2,24 @@
 
 import { createContext, useContext, useState, ReactNode } from 'react'
 
+interface UserProfile {
+  transport_mode: 'car' | 'transit' | 'walk' | 'bike' | 'mixed'
+  diet_type: 'omnivore' | 'vegetarian' | 'vegan' | 'flexitarian'
+  housing_type: 'apartment' | 'house' | 'studio' | 'dorm' | 'other'
+}
+
 interface User {
   id: string
   email: string
-  nickname: string
-  onboarding_complete: boolean
+  nickname: string | null
+  profile_image_url: string | null
+  onboarding_completed: boolean
+  profile: UserProfile | null
 }
 
 interface Tokens {
-  remaining: number
-  max: number
+  remaining: number  // API: tokens_remaining
+  max: number        // 고정값 150 (API 미제공)
 }
 
 interface AppState {

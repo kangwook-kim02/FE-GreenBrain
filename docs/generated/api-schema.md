@@ -1,50 +1,54 @@
-> 백엔드 API 명세. 현재 코드에서 추출된 API 호출 목록. 상세 타입은 `.claude/skills/implement-feature/references/api-shapes.md` 참조.
+> 백엔드 API 명세. 확정 명세 기준(docs/GreenBrain-API.md, 2026-05-15). 상세 타입은 `.claude/skills/implement-feature/references/api-shapes.md` 참조.
 
 ## 인증
 
 | Method | Path | 설명 | 요청 타입 | 응답 타입 |
 |--------|------|------|----------|----------|
-| POST | `/api/auth/login` | 로그인 | `{ email, password }` | 쿠키 / `{ error }` |
-| POST | `/api/auth/signup` | 회원가입 | `{ email, password }` | 쿠키 / `{ error }` |
-| POST | `/api/auth/logout` | 로그아웃 | 없음 | 204 |
+| POST | `/api/auth/signup` | 회원가입 | `{ email, password }` | 201: `{ id, email, onboarding_completed, created_at }` |
+| POST | `/api/auth/login` | 로그인 | `{ email, password }` | 200: `{ message }` + HttpOnly 쿠키 |
+| POST | `/api/auth/logout` | 로그아웃 | 없음 | 200: `{ message }` |
 
-## 온보딩
+## 유저
 
 | Method | Path | 설명 | 요청 타입 | 응답 타입 |
 |--------|------|------|----------|----------|
-| POST | `/api/user/onboarding` | 온보딩 저장 | `{ transportation, diet, housing }` | `{ user }` / `{ error }` |
+| GET | `/api/users/me` | 현재 사용자 조회 | 없음 | `UserMe` |
+| PATCH | `/api/users/me` | 기본 프로필 수정 | `{ nickname?, profile_image_url? }` | `{ id, email, nickname, profile_image_url, updated_at }` |
+| GET | `/api/users/profile` | 생활습관 프로필 조회 | 없음 | `UserProfile & { updated_at }` |
+| PATCH | `/api/users/profile` | 생활습관 프로필 수정 | `{ transport_mode?, diet_type?, housing_type? }` | `UserProfile & { updated_at }` |
 
 ## 채팅
 
 | Method | Path | 설명 | 요청 타입 | 응답 타입 |
 |--------|------|------|----------|----------|
-| GET | `/api/user/tokens` | 토큰 조회 | 없음 | `{ remaining, max }` |
-| GET | `/api/chat/history` | 채팅 히스토리 | 없음 | `{ groups: ChatHistoryGroup[] }` |
-| POST | `/api/chat/message` | 메시지 전송 | `{ message }` | `{ reply, carbon_cost, remaining_tokens }` |
+| POST | `/api/chat/sessions` | 세션 생성 | 없음 | 201: `ChatSession` |
+| GET | `/api/chat/sessions` | 세션 목록 | `?limit&cursor` | `{ items: ChatSession[], next_cursor }` |
+| PATCH | `/api/chat/sessions/{id}` | 세션 제목 수정 | `{ title? }` | `ChatSession` |
+| DELETE | `/api/chat/sessions/{id}` | 세션 삭제 | 없음 | 204 |
+| POST | `/api/chat/sessions/{id}/messages` | 메시지 전송 | `{ message }` | `{ response, carbon_gco2eq, tokens_remaining, exhausted, ... }` |
+| GET | `/api/chat/sessions/{id}/messages` | 메시지 목록 | `?limit&cursor` | `{ items: ChatMessage[], next_cursor }` |
 
-## 챌린지
+## 토큰
+
+| Method | Path | 설명 | 요청 타입 | 응답 타입 |
+|--------|------|------|----------|----------|
+| GET | `/api/tokens/today` | 오늘 토큰 상태 | 없음 | `TokenToday` |
+
+## 챌린지 (API 명세 미확정)
 
 | Method | Path | 설명 | 요청 타입 | 응답 타입 |
 |--------|------|------|----------|----------|
 | GET | `/api/challenges/current` | 현재 챌린지 조회 | 없음 | `{ challenge, daily_count }` |
 | POST | `/api/challenges/{id}/accept` | 챌린지 수락 | 없음 | `{ challenge }` |
-| POST | `/api/challenges/{id}/verify` | 챌린지 인증 | `FormData { photo }` | `{ remaining_tokens }` / `{ error }` |
+| POST | `/api/challenges/{id}/verify` | 챌린지 인증 | `FormData { photo }` | `{ tokens_remaining }` |
 
-## 인증 피드
+## 인증 피드 (API 명세 미확정)
 
 | Method | Path | 설명 | 요청 타입 | 응답 타입 |
 |--------|------|------|----------|----------|
-| GET | `/api/feed` | 피드 목록 | `?page=1` | `{ items: FeedItem[], has_next }` |
-| POST | `/api/feed/{item_id}/like` | 좋아요 | 없음 | `{ likes, liked_by_me }` / `{ error }` |
+| GET | `/api/feed` | 피드 목록 | `?page` | `{ items: FeedItem[], has_next }` |
+| POST | `/api/feed/{item_id}/like` | 좋아요 | 없음 | `{ likes, liked_by_me }` |
 | DELETE | `/api/feed/{item_id}` | 피드 삭제 | 없음 | 204 |
-
-## 프로필
-
-| Method | Path | 설명 | 요청 타입 | 응답 타입 |
-|--------|------|------|----------|----------|
-| PATCH | `/api/user/profile` | 닉네임 수정 | `{ nickname }` | `{ user }` |
-| POST | `/api/user/avatar` | 아바타 업로드 | `FormData { avatar }` | `{ avatar_url }` |
-| PATCH | `/api/user/onboarding` | 생활습관 수정 | `{ transportation?, diet?, housing? }` | 200 |
 
 ## 공통 에러 처리
 
@@ -53,5 +57,6 @@
 | 401 | `/login` 리다이렉트 |
 | 403 | 인라인 에러 메시지 |
 | 422 | 필드별 에러 메시지 |
-| 500 | "일시적인 오류가 발생했습니다" 토스트 |
+| 429 | 로그인 횟수 초과 인라인 메시지 |
+| 500/502 | "일시적인 오류가 발생했습니다" 토스트 |
 | 네트워크 오류 | "인터넷 연결을 확인해주세요" 토스트 |
