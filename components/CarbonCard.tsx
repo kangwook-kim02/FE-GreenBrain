@@ -15,7 +15,7 @@ export default function CarbonCard({ carbonCost, analogy }: CarbonCardProps) {
       {analogy && <span className="text-lg">{analogy.icon}</span>}
       <div className="flex-1">
         {analogy && <p className="text-xs text-gray-600">{analogy.text}</p>}
-        <p className="text-xs text-gray-500 mt-0.5">{carbonCost} gCO₂eq 배출</p>
+        <p className="text-xs text-gray-500 mt-0.5">{carbonCost.toFixed(1)} gCO₂eq 배출</p>
       </div>
     </div>
   )

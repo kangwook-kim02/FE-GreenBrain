@@ -34,7 +34,7 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || mockTokens.remaining <= 0 || isLoading) return
 
@@ -52,7 +52,7 @@ export default function ChatPage() {
     setTimeout(() => {
       const carbonCost = Math.floor(Math.random() * 8) + 3
       const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: Date.now().toString() + '-ai',
         role: 'assistant',
         content: '이것은 시뮬레이션 응답입니다. 실제 백엔드 연결 시 AI 응답이 표시됩니다.',
         carbonCost,
