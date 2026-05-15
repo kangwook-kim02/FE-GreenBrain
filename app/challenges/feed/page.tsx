@@ -9,7 +9,6 @@ interface FeedItem {
   userId: string
   username: string
   challengeTitle: string
-  challengeIcon: string
   imageUrl: string
   likes: number
   likedByMe: boolean
@@ -23,7 +22,6 @@ const MOCK_FEED: FeedItem[] = [
     userId: 'u1',
     username: '김현진',
     challengeTitle: '대중교통으로 출퇴근하기',
-    challengeIcon: 'bus',
     imageUrl: '/placeholder-feed.jpg',
     likes: 5,
     likedByMe: false,
@@ -35,7 +33,6 @@ const MOCK_FEED: FeedItem[] = [
     userId: 'u2',
     username: '이승호',
     challengeTitle: '채식 식단 도전',
-    challengeIcon: 'leaf',
     imageUrl: '/placeholder-feed.jpg',
     likes: 12,
     likedByMe: true,
@@ -47,7 +44,6 @@ const MOCK_FEED: FeedItem[] = [
     userId: 'me',
     username: '나',
     challengeTitle: '에너지 절약하기',
-    challengeIcon: 'bolt',
     imageUrl: '/placeholder-feed.jpg',
     likes: 3,
     likedByMe: false,
@@ -78,14 +74,14 @@ function FeedCard({
   const [likedByMe, setLikedByMe] = useState(item.likedByMe)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
-  async function handleLike() {
+  function handleLike() {
     if (likedByMe || item.isOwner) return
     setLikedByMe(true)
     setLikes((prev) => prev + 1)
     // API 연동은 후속 이슈에서 구현
   }
 
-  async function handleDelete() {
+  function handleDelete() {
     // API 연동은 후속 이슈에서 구현
     onDelete(item.id)
     setShowDeleteConfirm(false)
@@ -182,7 +178,8 @@ function FeedCard({
 
 export default function ChallengeFeedPage() {
   const [feedItems, setFeedItems] = useState<FeedItem[]>(MOCK_FEED)
-  const [isLoading] = useState(false)
+  // setIsLoading은 issue #15 API 연동 시 사용
+  const [isLoading, setIsLoading] = useState(false)
 
   function handleDelete(id: string) {
     setFeedItems((prev) => prev.filter((item) => item.id !== id))
@@ -214,6 +211,7 @@ export default function ChallengeFeedPage() {
           <EmptyState
             message="아직 인증된 챌린지가 없습니다"
             ctaLabel="챌린지 참여하기"
+            // TODO(issue #15): API 연동 시 챌린지 참여 화면으로 이동
             onCta={() => {}}
           />
         ) : (
