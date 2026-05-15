@@ -2,7 +2,13 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
+import { apiFetch } from '@/lib/api'
+import { useApp } from '@/contexts/AppContext'
+import type { User } from '@/contexts/AppContext'
+
+type UserMe = User & { today_tokens: { tokens_remaining: number } }
 
 interface SignupForm {
   email: string
@@ -13,6 +19,8 @@ interface SignupForm {
 const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}$/
 
 export default function SignupPage() {
+  const router = useRouter()
+  const { setUser, updateRemainingTokens } = useApp()
   const [isLoading, setIsLoading] = useState(false)
   const [serverError, setServerError] = useState('')
 
@@ -25,11 +33,31 @@ export default function SignupPage() {
 
   const password = watch('password')
 
-  async function onSubmit(_data: SignupForm) {
+  async function onSubmit(data: SignupForm) {
     setServerError('')
     setIsLoading(true)
-    // API 연동은 issue #12에서 구현
-    setIsLoading(false)
+    try {
+      await apiFetch('/api/auth/signup', {
+        method: 'POST',
+        body: { email: data.email, password: data.password },
+      })
+      const me = await apiFetch<UserMe>('/api/users/me')
+      const { today_tokens, ...userFields } = me
+      setUser(userFields)
+      updateRemainingTokens(today_tokens.tokens_remaining)
+      router.push('/onboarding')
+    } catch (err) {
+      const status = (err as { status?: number }).status
+      if (status === 400) {
+        setServerError('이미 사용 중인 이메일입니다')
+      } else if (status === 422) {
+        setServerError('입력 형식을 확인해주세요')
+      } else {
+        setServerError('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -112,7 +140,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-green-500 hover:bg-green-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             {isLoading && (
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -120,7 +148,7 @@ export default function SignupPage() {
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
               </svg>
             )}
-            {isLoading ? '처리 중...' : '가입하기'}
+            {isLoading ? '가입 중...' : '가입하기'}
           </button>
         </form>
 
