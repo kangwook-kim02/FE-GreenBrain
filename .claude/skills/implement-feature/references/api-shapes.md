@@ -54,25 +54,30 @@ interface TokenToday {
   updated_at: string        // ISO 8601
 }
 
-// 챌린지·피드 타입 — API 명세 확정 전 placeholder
 interface Challenge {
-  id: string
+  id: string                                          // UUID
+  category: 'transport' | 'diet' | 'energy'
   title: string
   description: string
-  category: '교통' | '식단' | '에너지'
-  icon: string
+  difficulty: 1 | 2 | 3
+  status: 'pending_acceptance' | 'active' | 'completed'
+  created_at: string                                  // ISO 8601
+  completed_at: string | null                         // ISO 8601
 }
 
 interface FeedItem {
-  id: string
-  userId: string
-  username: string
-  challengeTitle: string
-  imageUrl: string
-  likes: number
-  likedByMe: boolean
-  isOwner: boolean
-  timestamp: string
+  photo_id: string                                    // UUID
+  challenge_id: string                               // UUID
+  user_id: string                                    // UUID
+  nickname: string | null
+  profile_image_url: string | null
+  title: string                                      // 챌린지 제목
+  category: 'transport' | 'diet' | 'energy'
+  photo_url: string
+  like_count: number
+  liked_by_me: boolean
+  carbon_saved_gco2eq: number | null
+  created_at: string                                 // ISO 8601
 }
 ```
 
@@ -195,37 +200,94 @@ GET /api/tokens/today
 
 ---
 
-## 챌린지 (API 명세 미확정 — placeholder)
+## 챌린지
 
 ```
 GET /api/challenges/current
-응답:    { challenge: Challenge | null; daily_count: number }
+응답:    { challenge: Challenge | null }
+200:     조회 성공
+401:     미인증
+
+POST /api/challenges/generate
+Body:    없음
+200/201: { challenge: Challenge; created: boolean }
+         created=true → 새로 생성, false → 기존 진행 중 반환
+401:     미인증
+409:     토큰이 남아 있어 챌린지 생성 불가
+429:     하루 챌린지 생성 횟수 초과 (최대 3회)
+→ 토큰 소진 시 호출
 
 POST /api/challenges/{id}/accept
-응답:    { challenge: Challenge }
+Body:    없음
+200:     { challenge: Challenge }  // status: 'active'
+401:     미인증
+404:     챌린지 없음 또는 본인 챌린지 아님
+409:     pending_acceptance 상태 아님
 
-POST /api/challenges/{id}/verify
-Body:    FormData { photo: File }  (JPEG/PNG/WebP, 최대 10MB)
-응답:    { tokens_remaining: number }
-실패:    { error: string }
+POST /api/challenges/{id}/photo
+Body:    FormData { file: File }  (form-data, 이미지 파일)
+200:     {
+           photo: { id: string; challenge_id: string; file_url: string; created_at: string }
+           challenge: { id: string; status: 'completed'; completed_at: string }
+           reward: { type: 'upload_reward'; reward_amount: number; tokens_remaining: number }
+         }
+400:     파일 형식 오류 / 파일 크기 초과
+401:     미인증
+404:     챌린지 없음 또는 본인 챌린지 아님
+409:     active 상태 아님 또는 이미 사진 업로드됨
+→ 업로드 성공 시 reward.tokens_remaining으로 AppContext 업데이트
 ```
 
 ---
 
-## 인증 피드 (API 명세 미확정 — placeholder)
+## 인증 피드
 
 ```
-GET /api/feed
-Query:   { page?: number }
-응답:    { items: FeedItem[]; has_next: boolean }
+GET /api/challenges/feed
+Query:   { limit?: number; offset?: number }  // 기본값 limit=20, offset=0
+200:     { items: FeedItem[]; total: number | null; limit: number; offset: number }
+400:     query parameter 형식 오류
+401:     미인증
 
-POST /api/feed/{item_id}/like
-응답:    { likes: number; liked_by_me: boolean }
-실패:    { error: string }
-
-DELETE /api/feed/{item_id}
-204:     No Content
+DELETE /api/challenge-photos/{photo_id}
+200:     { deleted: boolean; photo_id: string; deleted_at: string }
+401:     미인증
+404:     사진 없음 또는 본인 게시물 아님
+409:     이미 삭제된 게시물
 → Optimistic UI: 목록에서 즉시 제거
+```
+
+---
+
+## 좋아요
+
+```
+POST /api/challenge-photos/{photo_id}/like
+Body:    없음
+200:     {
+           liked: boolean
+           photo_id: string
+           like_count: number
+           reward_given: boolean           // 3개 단위 milestone 도달 시 true
+           reward_amount: number           // 미달 시 0.0
+           tokens_remaining: number | null // 보상 없으면 null
+         }
+400:     삭제된 사진 또는 좋아요 불가
+401:     미인증
+404:     사진 없음
+409:     이미 좋아요 누름 또는 본인 사진
+429:     신규 계정 제한 또는 일일 보상 한도 초과
+
+GET /api/challenge-photos/{photo_id}/likes
+Query:   { limit?: number; offset?: number }
+200:     {
+           items: Array<{ user_id: string; nickname: string | null; profile_image_url: string | null; liked_at: string }>
+           total: number | null
+           limit: number
+           offset: number
+         }
+401:     미인증
+404:     사진 없음 또는 삭제된 사진
 ```
 
 ---

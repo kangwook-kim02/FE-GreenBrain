@@ -609,3 +609,507 @@ Example
 | --- | --- |
 | 200 | 오늘 토큰 상태 조회 성공 |
 | 401 | 인증되지 않은 사용자 |
+
+
+---
+# 신규(20260515)
+**2026-05-15 신규 추가**
+
+## 챌린지
+
+### 챌린지 조회
+- 설명: 현재 사용자의 진행 중 챌린지를 조회한다.
+- 메서드: GET
+- URL: /api/challenges/current
+
+### Request
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| 없음 | 요청 body 없음 | - | - | - | - |
+|  |  |  |  |  |  |
+
+**Query parameter**
+
+없음
+
+### Response
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| challenge | 현재 진행 중 챌린지 정보 | object | - | O | {...} |
+| challenge.id | 챌린지 ID | string(UUID) | - | X | "c1a2..." |
+| challenge.category | 챌린지 카테고리 | string | transport, diet, energy | X | "energy" |
+| challenge.title | 챌린지 제목 | string | - | X | "오늘 에어컨 1시간 줄이기" |
+| challenge.description | 챌린지 설명 | string | - | X | "오늘 하루 에어컨 사용 시간을 줄여보세요." |
+| challenge.difficulty | 난이도 | integer | 1~3 | X | 1 |
+| challenge.status | 챌린지 상태 | string | pending_acceptance, active, completed | X | "active" |
+| challenge.created_at | 생성 시각 | string(datetime) | ISO 8601 | X | "2026-05-04T12:00:00Z" |
+| challenge.completed_at | 완료 시각 | string(datetime) | ISO 8601 | O | null |
+
+**Example**
+
+```jsx
+{
+  "challenge": {
+    "id": "c1a2b3d4-1111-2222-3333-444455556666",
+    "category": "energy",
+    "title": "오늘 에어컨 1시간 줄이기",
+    "description": "오늘 하루 에어컨 사용 시간을 평소보다 1시간 줄여보세요.",
+    "difficulty": 1,
+    "status": "active",
+    "created_at": "2026-05-04T12:00:00Z",
+    "completed_at": null
+  }
+}
+```
+
+```jsx
+// 진행 중 챌린지가 없는 경우
+{
+  "challenge": null
+}
+```
+
+### Status
+
+| status | response content |
+| --- | --- |
+| 200 | 현재 진행 중 챌린지 조회 성공 |
+| 401 | 로그인하지 않은 사용자 |
+
+### 챌린지 생성
+- 설명: 토큰 소진 시 개인 맞춤 챌린지를 생성한다.
+- 메서드: POST
+- URL: /api/challenges/generate
+
+### Request
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| 없음 | 요청 body 없음 | - | - | - | - |
+|  |  |  |  |  |  |
+
+**Query parameter**
+
+없음
+
+### Response
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| challenge | 생성되었거나 기존에 존재하는 챌린지 | object | - | X | {...} |
+| challenge.id | 챌린지 ID | string(UUID) | - | X | "c1a2..." |
+| challenge.category | 챌린지 카테고리 | string | transport, diet, energy | X | "transport" |
+| challenge.title | 챌린지 제목 | string | - | X | "가까운 거리는 도보로 이동하기" |
+| challenge.description | 챌린지 설명 | string | - | X | "오늘 1km 이내 이동은 걸어서 이동해보세요." |
+| challenge.difficulty | 난이도 | integer | 1~3 | X | 1 |
+| challenge.status | 챌린지 상태 | string | pending_acceptance | X | "pending_acceptance" |
+| challenge.created_at | 생성 시각 | string(datetime) | ISO 8601 | X | "2026-05-04T12:00:00Z" |
+| challenge.completed_at | 완료 시각 | string(datetime) | ISO 8601 | O | null |
+| created | 새로 생성되었는지 여부 | boolean | - | X | true |
+
+**Example**
+
+```jsx
+{
+  "challenge": {
+    "id": "c1a2b3d4-1111-2222-3333-444455556666",
+    "category": "transport",
+    "title": "가까운 거리는 도보로 이동하기",
+    "description": "오늘 1km 이내 이동은 자동차 대신 걸어서 이동해보세요.",
+    "difficulty": 1,
+    "status": "pending_acceptance",
+    "created_at": "2026-05-04T12:00:00Z",
+    "completed_at": null
+  },
+  "created": true
+}
+```
+
+```jsx
+// 이미 진행 중인 챌린지가 있는 경우
+{
+  "challenge": {
+    "id": "c1a2b3d4-1111-2222-3333-444455556666",
+    "category": "transport",
+    "title": "가까운 거리는 도보로 이동하기",
+    "description": "오늘 1km 이내 이동은 자동차 대신 걸어서 이동해보세요.",
+    "difficulty": 1,
+    "status": "pending_acceptance",
+    "created_at": "2026-05-04T12:00:00Z",
+    "completed_at": null
+  },
+  "created": false
+}
+```
+
+### Status
+
+| status | response content |
+| --- | --- |
+| 200 | 기존 진행 중 챌린지 반환 |
+| 201 | 새 챌린지 생성 성공 |
+| 401 | 로그인하지 않은 사용자 |
+| 409 | 토큰이 아직 남아 있어 챌린지 생성 불가 |
+| 429 | 하루 챌린지 생성 횟수 초과 |
+| 500 | 챌린지 생성 실패 |
+
+### 챌린지 수락
+- 설명: 생성된 챌린지를 수락하고 active 상태로 변경한다.
+- 메서드: POST
+- URL: /api/challenges/{id}/accept
+
+### Request
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| id | 챌린지 ID | string(UUID) | path parameter | X | "c1a2b3d4-1111-2222-3333-444455556666" |
+|  |  |  |  |  |  |
+
+**Query parameter**
+
+없음
+
+### Response
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| challenge | 수락된 챌린지 정보 | object | - | X | {...} |
+| challenge.id | 챌린지 ID | string(UUID) | - | X | "c1a2..." |
+| challenge.category | 챌린지 카테고리 | string | transport, diet, energy | X | "energy" |
+| challenge.title | 챌린지 제목 | string | - | X | "오늘 에어컨 1시간 줄이기" |
+| challenge.description | 챌린지 설명 | string | - | X | "오늘 하루 에어컨 사용 시간을 줄여보세요." |
+| challenge.difficulty | 난이도 | integer | 1~3 | X | 1 |
+| challenge.status | 챌린지 상태 | string | active | X | "active" |
+| challenge.created_at | 생성 시각 | string(datetime) | ISO 8601 | X | "2026-05-04T12:00:00Z" |
+| challenge.completed_at | 완료 시각 | string(datetime) | ISO 8601 | O | null |
+
+**Example**
+
+```jsx
+{
+  "challenge": {
+    "id": "c1a2b3d4-1111-2222-3333-444455556666",
+    "category": "energy",
+    "title": "오늘 에어컨 1시간 줄이기",
+    "description": "오늘 하루 에어컨 사용 시간을 평소보다 1시간 줄여보세요.",
+    "difficulty": 1,
+    "status": "active",
+    "created_at": "2026-05-04T12:00:00Z",
+    "completed_at": null
+  }
+}
+```
+
+### Status
+
+| status | response content |
+| --- | --- |
+| 200 | 챌린지 수락 성공 |
+| 401 | 로그인하지 않은 사용자 |
+| 404 | 챌린지가 존재하지 않거나 본인 챌린지가 아님 |
+| 409 | pending_acceptance 상태가 아니어서 수락 불가 |
+
+### 챌린지 사진 업로드
+- 설명: 챌린지 인증 사진을 업로드하고 업로드 보상을 지급한다.
+- 메서드: POST 
+- URL: /api/challenges/{id}/photo
+
+### Request
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| id | 챌린지 ID | string(UUID) | path parameter | X | "c1a2b3d4-1111-2222-3333-444455556666" |
+| file | 인증 사진 파일 | File | form-data | X | challenge.jpg |
+
+**Query parameter**
+
+없음
+
+### Response
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| photo_id | 업로드된 사진 ID | string(UUID) | - | X | "p1a2..." |
+| challenge_id | 챌린지 ID | string(UUID) | - | X | "c1a2..." |
+| photo_url | 사진 접근 URL | string | public URL 또는 signed URL | X | "https://..." |
+| tokens_remaining | 업로드 보상 반영 후 남은 토큰 | number | 0~150 | X | 120.0 |
+| reward_amount | 실제 지급된 보상 토큰 | number | 0~20 | X | 20.0 |
+| status | 변경된 챌린지 상태 | string | completed | X | "completed" |
+
+**Example**
+
+```jsx
+{
+  "photo": {
+    "id": "photo_uuid",
+    "challenge_id": "challenge_uuid",
+    "file_url": "https://...",
+    "created_at": "2026-05-15T12:00:00Z"
+  },
+  "challenge": {
+    "id": "challenge_uuid",
+    "status": "completed",
+    "completed_at": "2026-05-15T12:00:00Z"
+  },
+  "reward": {
+    "type": "upload_reward",
+    "reward_amount": 20.0,
+    "tokens_remaining": 120.0
+  }
+}
+```
+
+### Status
+
+| status | response content |
+| --- | --- |
+| 200 | 사진 업로드 성공 |
+| 400 | 파일 형식 오류, 파일 크기 초과, 이미지 처리 실패 |
+| 401 | 로그인하지 않은 사용자 |
+| 404 | 챌린지가 존재하지 않거나 본인 챌린지가 아님 |
+| 409 | 챌린지가 active 상태가 아니거나 이미 사진이 업로드됨 |
+| 500 | 파일 저장 실패 |
+
+
+## 피드
+
+### 챌린지 피드 조회
+- 설명: 삭제되지 않은 인증 피드 목록을 최신순으로 조회한다.
+- 메서드: GET
+- URL: /api/challenges/feed
+
+### Request
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| 없음 | 요청 body 없음 | - | - | - | - |
+|  |  |  |  |  |  |
+
+**Query parameter**
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| limit | 조회할 피드 개수 | integer | 기본값 20 | O | `20` |
+| offset | 조회 시작 위치 | integer | 기본값 0 | O | `0` |
+
+### Response
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| items | 피드 목록 | array | - | X | [{...}] |
+| items[].photo_id | 사진 ID | string(UUID) | - | X | "p1a2..." |
+| items[].challenge_id | 챌린지 ID | string(UUID) | - | X | "c1a2..." |
+| items[].user_id | 업로더 ID | string(UUID) | - | X | "u1a2..." |
+| items[].nickname | 업로더 닉네임 | string | - | O | "GreenUser" |
+| items[].profile_image_url | 업로더 프로필 이미지 | string | URL | O | "https://..." |
+| items[].title | 챌린지 제목 | string | - | X | "오늘 에어컨 1시간 줄이기" |
+| items[].category | 챌린지 카테고리 | string | transport, diet, energy | X | "energy" |
+| items[].photo_url | 인증 사진 URL | string | URL | X | "https://..." |
+| items[].like_count | 좋아요 수 | integer | 0 이상 | X | 4 |
+| items[].liked_by_me | 현재 사용자의 좋아요 여부 | boolean | - | X | true |
+| items[].carbon_saved_gco2eq | 예상 탄소 절감량 | number | gCO2eq | O | 120.0 |
+| items[].created_at | 피드 생성 시각 | string(datetime) | ISO 8601 | X | "2026-05-04T13:00:00Z" |
+| total | 전체 피드 개수 | integer | - | O | 42 |
+| limit | 요청한 limit | integer | - | X | 20 |
+| offset | 요청한 offset | integer | - | X | 0 |
+
+**Example**
+
+```jsx
+{
+  "items": [
+    {
+      "photo_id": "p1a2b3d4-1111-2222-3333-444455556666",
+      "challenge_id": "c1a2b3d4-1111-2222-3333-444455556666",
+      "user_id": "u1a2b3d4-1111-2222-3333-444455556666",
+      "nickname": "GreenUser",
+      "profile_image_url": "https://example.com/profile.png",
+      "title": "오늘 에어컨 1시간 줄이기",
+      "category": "energy",
+      "photo_url": "https://supabase-storage-url/challenge-photos/p1a2b3d4.jpg",
+      "like_count": 4,
+      "liked_by_me": true,
+      "carbon_saved_gco2eq": 120.0,
+      "created_at": "2026-05-04T13:00:00Z"
+    }
+  ],
+  "total": 1,
+  "limit": 20,
+  "offset": 0
+}
+```
+
+### Status
+
+| status | response content |
+| --- | --- |
+| 200 | 피드 조회 성공 |
+| 400 | query parameter 형식 오류 |
+| 401 | 로그인하지 않은 사용자 |
+
+### 피드 게시물 삭제
+- 설명: 본인이 업로드한 인증 피드 게시물을 soft delete 처리한다.
+- 메서드: DELETE
+- URL: /api/challenge-photos/{photo_id}
+
+### Request
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| photo_id | 삭제할 인증 사진 ID | string(UUID) | path parameter | X | "p1a2b3d4-1111-2222-3333-444455556666" |
+|  |  |  |  |  |  |
+
+**Query parameter**
+
+없음
+
+### Response
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| deleted | 삭제 처리 여부 | boolean | - | X | true |
+| photo_id | 삭제된 사진 ID | string(UUID) | - | X | "p1a2..." |
+| deleted_at | 삭제 시각 | string(datetime) | ISO 8601 | X | "2026-05-04T14:00:00Z" |
+
+**Example**
+
+```jsx
+{
+  "deleted": true,
+  "photo_id": "p1a2b3d4-1111-2222-3333-444455556666",
+  "deleted_at": "2026-05-04T14:00:00Z"
+}
+```
+
+### Status
+
+| status | response content |
+| --- | --- |
+| 200 | 피드 게시물 삭제 성공 |
+| 401 | 로그인하지 않은 사용자 |
+| 404 | 사진이 존재하지 않거나 본인 게시물이 아님 |
+| 409 | 이미 삭제된 게시물 |
+
+## 좋아요
+
+### 피드 좋아요
+- 설명: 인증 사진에 좋아요를 누르고, 3개 단위 도달 시 토큰 보상을 지급한다.
+- 메서드: POST
+- URL: /api/challenge-photos/{photo_id}/like
+
+### Request
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| photo_id | 좋아요를 누를 인증 사진 ID | string(UUID) | path parameter | X | "p1a2b3d4-1111-2222-3333-444455556666" |
+
+**Query parameter**
+
+없음
+
+### Response
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| liked | 좋아요 등록 여부 | boolean | - | X | true |
+| photo_id | 사진 ID | string(UUID) | - | X | "p1a2..." |
+| like_count | 현재 좋아요 수 | integer | 0 이상 | X | 3 |
+| reward_given | 보상 지급 여부 | boolean | - | X | true |
+| reward_amount | 실제 지급된 보상 토큰 | number | 0~20 | X | 20.0 |
+| tokens_remaining | 업로더의 보상 후 남은 토큰 | number | 0~150 | O | 120.0 |
+
+**Example**
+
+```jsx
+{
+  "liked": true,
+  "photo_id": "p1a2b3d4-1111-2222-3333-444455556666",
+  "like_count": 3,
+  "reward_given": true,
+  "reward_amount": 20.0,
+  "tokens_remaining": 120.0
+}
+```
+
+```jsx
+// milestone에 도달하지 않은 경우
+{
+  "liked": true,
+  "photo_id": "p1a2b3d4-1111-2222-3333-444455556666",
+  "like_count": 2,
+  "reward_given": false,
+  "reward_amount": 0.0,
+  "tokens_remaining": null
+}
+```
+
+### Status
+
+| status | response content |
+| --- | --- |
+| 200 | 좋아요 등록 성공 |
+| 400 | 삭제된 사진이거나 좋아요 불가 상태 |
+| 401 | 로그인하지 않은 사용자 |
+| 404 | 사진이 존재하지 않음 |
+| 409 | 이미 좋아요를 누른 사진 또는 본인 사진 좋아요 시도 |
+| 429 | 신규 계정 제한 또는 일일 보상 한도 초과 |
+
+### 좋아요 사용자 목록 조회
+- 설명: 해당 사진에 좋아요를 누른 사용자 목록을 조회한다. 이메일은 노출하지 않는다.
+- 메서드: GET
+- URL: /api/challenge-photos/{photo_id}/likes
+
+### Request
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| photo_id | 인증 사진 ID | string(UUID) | path parameter | X | "p1a2b3d4-1111-2222-3333-444455556666" |
+
+**Query parameter**
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| limit | 조회할 사용자 수 | integer | 기본값 20 | O | `20` |
+| offset | 조회 시작 위치 | integer | 기본값 0 | O | `0` |
+
+### Response
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| items | 좋아요 사용자 목록 | array | - | X | [{...}] |
+| items[].user_id | 좋아요를 누른 사용자 ID | string(UUID) | - | X | "u1a2..." |
+| items[].nickname | 사용자 닉네임 | string | - | O | "GreenUser" |
+| items[].profile_image_url | 사용자 프로필 이미지 | string | URL | O | "https://..." |
+| items[].liked_at | 좋아요를 누른 시각 | string(datetime) | ISO 8601 | X | "2026-05-04T13:10:00Z" |
+| total | 전체 좋아요 사용자 수 | integer | - | O | 3 |
+| limit | 요청한 limit | integer | - | X | 20 |
+| offset | 요청한 offset | integer | - | X | 0 |
+
+**Example**
+
+```jsx
+{
+  "items": [
+    {
+      "user_id": "u1a2b3d4-1111-2222-3333-444455556666",
+      "nickname": "GreenUser",
+      "profile_image_url": "https://example.com/profile.png",
+      "liked_at": "2026-05-04T13:10:00Z"
+    }
+  ],
+  "total": 1,
+  "limit": 20,
+  "offset": 0
+}
+```
+
+### Status
+
+| status | response content |
+| --- | --- |
+| 200 | 좋아요 사용자 목록 조회 성공 |
+| 400 | query parameter 형식 오류 |
+| 401 | 로그인하지 않은 사용자 |
+| 404 | 사진이 존재하지 않거나 삭제된 사진 |
