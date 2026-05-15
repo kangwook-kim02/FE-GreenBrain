@@ -5,6 +5,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { apiFetch } from '@/lib/api'
+import { useApp } from '@/contexts/AppContext'
+import type { User } from '@/contexts/AppContext'
+
+type UserMe = User & { today_tokens: { tokens_remaining: number } }
 
 interface SignupForm {
   email: string
@@ -16,6 +20,7 @@ const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}$/
 
 export default function SignupPage() {
   const router = useRouter()
+  const { setUser, updateRemainingTokens } = useApp()
   const [isLoading, setIsLoading] = useState(false)
   const [serverError, setServerError] = useState('')
 
@@ -36,6 +41,10 @@ export default function SignupPage() {
         method: 'POST',
         body: { email: data.email, password: data.password },
       })
+      const me = await apiFetch<UserMe>('/api/users/me')
+      const { today_tokens, ...userFields } = me
+      setUser(userFields)
+      updateRemainingTokens(today_tokens.tokens_remaining)
       router.push('/onboarding')
     } catch (err) {
       const status = (err as { status?: number }).status
@@ -44,7 +53,7 @@ export default function SignupPage() {
       } else if (status === 422) {
         setServerError('입력 형식을 확인해주세요')
       } else {
-        throw err
+        setServerError('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
       }
     } finally {
       setIsLoading(false)

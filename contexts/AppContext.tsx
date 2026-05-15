@@ -9,7 +9,7 @@ interface UserProfile {
   housing_type: 'apartment' | 'house' | 'studio' | 'dorm' | 'other'
 }
 
-interface User {
+export interface User {
   id: string
   email: string
   nickname: string | null

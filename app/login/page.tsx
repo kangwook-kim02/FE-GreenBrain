@@ -5,6 +5,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { apiFetch } from '@/lib/api'
+import { useApp } from '@/contexts/AppContext'
+import type { User } from '@/contexts/AppContext'
+
+type UserMe = User & { today_tokens: { tokens_remaining: number } }
 
 interface LoginForm {
   email: string
@@ -13,6 +17,7 @@ interface LoginForm {
 
 export default function LoginPage() {
   const router = useRouter()
+  const { setUser, updateRemainingTokens } = useApp()
   const [isLoading, setIsLoading] = useState(false)
   const [serverError, setServerError] = useState('')
 
@@ -30,6 +35,10 @@ export default function LoginPage() {
         method: 'POST',
         body: { email: data.email, password: data.password },
       })
+      const me = await apiFetch<UserMe>('/api/users/me')
+      const { today_tokens, ...userFields } = me
+      setUser(userFields)
+      updateRemainingTokens(today_tokens.tokens_remaining)
       router.push('/chat')
     } catch (err) {
       const status = (err as { status?: number }).status
@@ -38,7 +47,7 @@ export default function LoginPage() {
       } else if (status === 429) {
         setServerError('로그인 시도 횟수를 초과했습니다')
       } else {
-        throw err
+        setServerError('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
       }
     } finally {
       setIsLoading(false)
