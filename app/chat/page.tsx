@@ -37,7 +37,7 @@ export default function ChatPage() {
       .then((data) => updateRemainingTokens(data.tokens_remaining))
       .catch(() => {})
       .finally(() => setIsTokenLoading(false))
-  }, [])
+  }, [updateRemainingTokens])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -196,12 +196,12 @@ export default function ChatPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={hasStarted ? '메시지를 입력하세요.' : '오늘 어떤 도움을 드릴까요?'}
-            disabled={tokens.remaining <= 0 || isLoading}
+            disabled={isTokenLoading || tokens.remaining <= 0 || isLoading}
             className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none disabled:bg-gray-100"
           />
           <button
             type="submit"
-            disabled={!input.trim() || tokens.remaining <= 0 || isLoading}
+            disabled={isTokenLoading || !input.trim() || tokens.remaining <= 0 || isLoading}
             className="px-6 py-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
           >
             전송
