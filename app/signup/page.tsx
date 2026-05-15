@@ -8,7 +8,7 @@ import { apiFetch } from '@/lib/api'
 import { useApp } from '@/contexts/AppContext'
 import type { User } from '@/contexts/AppContext'
 
-type UserMe = User & { today_tokens: { tokens_remaining: number } }
+type UserMe = User & { today_tokens?: { tokens_remaining: number } }
 
 interface SignupForm {
   email: string
@@ -44,7 +44,7 @@ export default function SignupPage() {
       const me = await apiFetch<UserMe>('/api/users/me')
       const { today_tokens, ...userFields } = me
       setUser(userFields)
-      updateRemainingTokens(today_tokens.tokens_remaining)
+      if (today_tokens) updateRemainingTokens(today_tokens.tokens_remaining)
       router.push('/onboarding')
     } catch (err) {
       const status = (err as { status?: number }).status
