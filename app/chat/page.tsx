@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react'
 import TokenBar from '@/components/TokenBar'
 import CarbonCard from '@/components/CarbonCard'
+import { useApp } from '@/contexts/AppContext'
+import { apiFetch } from '@/lib/api'
 
 interface Message {
   id: string
@@ -19,11 +21,11 @@ function getCarbonAnalogy(carbonCost: number): { icon: string; text: string } {
 }
 
 export default function ChatPage() {
+  const { tokens, updateRemainingTokens } = useApp()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
-  // mock 토큰 — API 연동 후 AppContext tokens로 교체 (issue #13)
-  const [mockTokens] = useState({ remaining: 150, max: 150 })
   const [isLoading, setIsLoading] = useState(false)
+  const [isTokenLoading, setIsTokenLoading] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const hasStarted = messages.length > 0
@@ -31,12 +33,19 @@ export default function ChatPage() {
   const username = '환경지킴이'
 
   useEffect(() => {
+    apiFetch<{ tokens_remaining: number }>('/api/tokens/today')
+      .then((data) => updateRemainingTokens(data.tokens_remaining))
+      .catch(() => {})
+      .finally(() => setIsTokenLoading(false))
+  }, [updateRemainingTokens])
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim() || mockTokens.remaining <= 0 || isLoading) return
+    if (!input.trim() || tokens.remaining <= 0 || isLoading) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -48,7 +57,7 @@ export default function ChatPage() {
     setInput('')
     setIsLoading(true)
 
-    // API 연동은 issue #9에서 구현
+    // 채팅 메시지 API 연동은 issue #13에서 구현
     setTimeout(() => {
       const carbonCost = Math.floor(Math.random() * 8) + 3
       const aiMessage: Message = {
@@ -62,7 +71,7 @@ export default function ChatPage() {
     }, 1000)
   }
 
-  if (mockTokens.remaining <= 0) {
+  if (!isTokenLoading && tokens.remaining <= 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md text-center">
@@ -101,11 +110,11 @@ export default function ChatPage() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700">탄소 토큰</span>
-              <span className={`text-sm font-bold ${mockTokens.remaining <= 30 ? 'text-red-500' : 'text-gray-900'}`}>
-                {mockTokens.remaining} / {mockTokens.max} gCO₂eq
+              <span className={`text-sm font-bold ${tokens.remaining <= 30 ? 'text-red-500' : 'text-gray-900'}`}>
+                {isTokenLoading ? '...' : `${tokens.remaining} / ${tokens.max} gCO₂eq`}
               </span>
             </div>
-            <TokenBar remaining={mockTokens.remaining} max={mockTokens.max} />
+            <TokenBar remaining={isTokenLoading ? tokens.max : tokens.remaining} max={tokens.max} />
             <div className="flex justify-end mt-2">
               {/* 챌린지 모달 연결은 issue #4에서 구현 */}
               <button
@@ -187,12 +196,12 @@ export default function ChatPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={hasStarted ? '메시지를 입력하세요.' : '오늘 어떤 도움을 드릴까요?'}
-            disabled={mockTokens.remaining <= 0 || isLoading}
+            disabled={isTokenLoading || tokens.remaining <= 0 || isLoading}
             className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none disabled:bg-gray-100"
           />
           <button
             type="submit"
-            disabled={!input.trim() || mockTokens.remaining <= 0 || isLoading}
+            disabled={isTokenLoading || !input.trim() || tokens.remaining <= 0 || isLoading}
             className="px-6 py-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
           >
             전송
