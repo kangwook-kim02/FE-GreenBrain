@@ -8,7 +8,7 @@ import { apiFetch } from '@/lib/api'
 import { useApp } from '@/contexts/AppContext'
 import type { User } from '@/contexts/AppContext'
 
-type UserMe = User & { today_tokens: { tokens_remaining: number } }
+type UserMe = User & { today_tokens?: { tokens_remaining: number } }
 
 interface LoginForm {
   email: string
@@ -36,9 +36,10 @@ export default function LoginPage() {
         body: { email: data.email, password: data.password },
       })
       const me = await apiFetch<UserMe>('/api/users/me')
+      // console.log('[login] /api/users/me →', me)
       const { today_tokens, ...userFields } = me
       setUser(userFields)
-      updateRemainingTokens(today_tokens.tokens_remaining)
+      if (today_tokens) updateRemainingTokens(today_tokens.tokens_remaining)
       router.push('/chat')
     } catch (err) {
       const status = (err as { status?: number }).status

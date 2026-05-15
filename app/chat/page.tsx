@@ -10,7 +10,17 @@ interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
-  carbonCost?: number
+  carbonCost?: number | null
+}
+
+interface ChatMessageResponse {
+  message_id: string
+  response_message_id: string
+  response: string
+  carbon_gco2eq: number | null
+  tokens_remaining: number
+  exhausted: boolean
+  session_title: string | null
 }
 
 function getCarbonAnalogy(carbonCost: number): { icon: string; text: string } {
@@ -21,16 +31,16 @@ function getCarbonAnalogy(carbonCost: number): { icon: string; text: string } {
 }
 
 export default function ChatPage() {
-  const { tokens, updateRemainingTokens } = useApp()
+  const { user, tokens, updateRemainingTokens } = useApp()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isTokenLoading, setIsTokenLoading] = useState(true)
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const hasStarted = messages.length > 0
-  // username은 API 연동 후 AppContext user.nickname으로 교체 (issue #13)
-  const username = '환경지킴이'
+  const username = user?.nickname ?? '환경지킴이'
 
   useEffect(() => {
     apiFetch<{ tokens_remaining: number }>('/api/tokens/today')
@@ -43,32 +53,65 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || tokens.remaining <= 0 || isLoading) return
 
+    const text = input.trim()
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input.trim(),
+      content: text,
     }
 
     setMessages((prev) => [...prev, userMessage])
     setInput('')
     setIsLoading(true)
 
-    // 채팅 메시지 API 연동은 issue #13에서 구현
-    setTimeout(() => {
-      const carbonCost = Math.floor(Math.random() * 8) + 3
-      const aiMessage: Message = {
-        id: Date.now().toString() + '-ai',
-        role: 'assistant',
-        content: '이것은 시뮬레이션 응답입니다. 실제 백엔드 연결 시 AI 응답이 표시됩니다.',
-        carbonCost,
+    try {
+      let sessionId = currentSessionId
+      if (!sessionId) {
+        const session = await apiFetch<{ id: string }>('/api/chat/sessions', { method: 'POST' })
+        sessionId = session.id
+        setCurrentSessionId(sessionId)
       }
-      setMessages((prev) => [...prev, aiMessage])
+
+      const data = await apiFetch<ChatMessageResponse>(
+        `/api/chat/sessions/${sessionId}/messages`,
+        { method: 'POST', body: { message: text } }
+      )
+
+      updateRemainingTokens(data.tokens_remaining)
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: data.response_message_id,
+          role: 'assistant',
+          content: data.response,
+          carbonCost: data.carbon_gco2eq,
+        },
+      ])
+    } catch (err) {
+      const status = (err as { status?: number }).status
+      if (status === 403) {
+        updateRemainingTokens(0)
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now().toString() + '-err',
+            role: 'assistant',
+            content:
+              status === 502
+                ? 'AI 응답 생성에 실패했습니다. 잠시 후 다시 시도해주세요.'
+                : '오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+          },
+        ])
+      }
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   if (!isTokenLoading && tokens.remaining <= 0) {
@@ -164,7 +207,7 @@ export default function ChatPage() {
                     <div className="max-w-[70%]">
                       <CarbonCard
                         carbonCost={message.carbonCost}
-                        analogy={getCarbonAnalogy(message.carbonCost)}
+                        analogy={message.carbonCost !== null ? getCarbonAnalogy(message.carbonCost) : undefined}
                       />
                     </div>
                   </div>
