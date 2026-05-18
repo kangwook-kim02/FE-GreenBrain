@@ -134,6 +134,8 @@ export default function ProfilePage() {
   const [habitError, setHabitError] = useState('')
 
   const [avatarError, setAvatarError] = useState('')
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [isLoading, setIsLoading] = useState(true)
@@ -210,6 +212,13 @@ export default function ProfilePage() {
       if (section === 'transport') setTransportation(value)
       else if (section === 'diet') setDiet(value)
       else setHousing(value)
+      if (user?.profile) {
+        const updatedProfile = { ...user.profile }
+        if (section === 'transport') updatedProfile.transport_mode = value as typeof updatedProfile.transport_mode
+        else if (section === 'diet') updatedProfile.diet_type = value as typeof updatedProfile.diet_type
+        else updatedProfile.housing_type = value as typeof updatedProfile.housing_type
+        setUser({ ...user, profile: updatedProfile })
+      }
       setEditingSection(null)
     } catch {
       setHabitError('저장에 실패했습니다. 다시 시도해주세요.')
@@ -219,10 +228,15 @@ export default function ProfilePage() {
   }
 
   const handleAvatarClick = () => {
+    if (avatarPreview) {
+      setAvatarPreview(null)
+      setAvatarError('')
+      return
+    }
     fileInputRef.current?.click()
   }
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -236,8 +250,20 @@ export default function ProfilePage() {
     }
 
     setAvatarError('')
+    const reader = new FileReader()
+    reader.onload = () => {
+      setAvatarPreview(reader.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleAvatarUpload = async () => {
+    if (!avatarPreview || !fileInputRef.current?.files?.[0]) return
+
+    setIsUploadingAvatar(true)
+    setAvatarError('')
     const formData = new FormData()
-    formData.append('avatar', file)
+    formData.append('avatar', fileInputRef.current.files[0])
 
     try {
       const data = await apiFetch<{ profile_image_url: string }>('/api/users/me', {
@@ -245,11 +271,13 @@ export default function ProfilePage() {
         body: formData,
       })
       setUser(user ? { ...user, profile_image_url: data.profile_image_url } : null)
+      setAvatarPreview(null)
     } catch {
       setAvatarError('프로필 사진 변경에 실패했습니다.')
+    } finally {
+      setIsUploadingAvatar(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
     }
-
-    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const handleNameKeyDown = (e: React.KeyboardEvent) => {
@@ -259,7 +287,7 @@ export default function ProfilePage() {
 
   const nickname = user?.nickname ?? ''
   const email = user?.email ?? ''
-  const profileImageUrl = user?.profile_image_url
+  const profileImageUrl = avatarPreview ?? user?.profile_image_url
 
   const currentTransport = findOption(TRANSPORT_OPTIONS, transportation)
   const currentDiet = findOption(DIET_OPTIONS, diet)
@@ -277,11 +305,7 @@ export default function ProfilePage() {
               </div>
             </header>
             <div className="flex-1 flex items-center justify-center">
-              <div className="flex gap-2">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-              </div>
+              <div className="w-8 h-8 border-3 border-green-500 border-t-transparent rounded-full animate-spin" />
             </div>
           </div>
         )}
@@ -313,26 +337,33 @@ export default function ProfilePage() {
                       <img
                         src={profileImageUrl}
                         alt="프로필 사진"
-                        className="w-20 h-20 rounded-full object-cover"
+                        className={`w-20 h-20 rounded-full object-cover ${avatarPreview ? 'ring-2 ring-green-400 ring-offset-2' : ''}`}
                       />
                     ) : (
                       <div className="w-20 h-20 rounded-full bg-linear-to-br from-green-400 to-green-600 flex items-center justify-center text-white text-3xl font-bold select-none">
                         {nickname ? nickname[0] : '?'}
                       </div>
                     )}
-                    <button
-                      type="button"
-                      onClick={handleAvatarClick}
-                      className="absolute bottom-0 right-0 w-7 h-7 bg-white border-2 border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors"
-                      title="프로필 사진 변경"
-                    >
-                      <svg className="w-3.5 h-3.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    </button>
+                    {isUploadingAvatar && (
+                      <div className="absolute inset-0 rounded-full bg-white/60 flex items-center justify-center">
+                        <div className="w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                    {!isUploadingAvatar && (
+                      <button
+                        type="button"
+                        onClick={handleAvatarClick}
+                        className="absolute bottom-0 right-0 w-7 h-7 bg-white border-2 border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors"
+                        title={avatarPreview ? '미리보기 취소' : '프로필 사진 변경'}
+                      >
+                        <svg className="w-3.5 h-3.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </button>
+                    )}
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -393,6 +424,23 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 {avatarError && <p className="text-sm text-red-600 mt-3">{avatarError}</p>}
+                {avatarPreview && (
+                  <div className="mt-3 flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => { setAvatarPreview(null); setAvatarError('') }}
+                      className="text-sm text-gray-600 hover:text-gray-800 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      취소
+                    </button>
+                    <button
+                      onClick={handleAvatarUpload}
+                      disabled={isUploadingAvatar}
+                      className="text-sm text-white bg-green-500 hover:bg-green-600 disabled:bg-gray-300 font-semibold px-4 py-1.5 rounded-lg transition-colors"
+                    >
+                      사진 저장
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* 생활 습관 프로필 */}
