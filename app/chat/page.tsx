@@ -6,6 +6,7 @@ import TokenBar from '@/components/TokenBar'
 import CarbonCard from '@/components/CarbonCard'
 import SidebarLayout from '@/components/SidebarLayout'
 import NavMenu from '@/components/NavMenu'
+import ChallengeModal from '@/components/ChallengeModal'
 import { useApp } from '@/contexts/AppContext'
 import { apiFetch } from '@/lib/api'
 
@@ -90,6 +91,7 @@ function ChatContent() {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(sid)
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
   const [modelDropdownOpen, setModelDropdownOpen] = useState(false)
+  const [challengeModalOpen, setChallengeModalOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const modelDropdownRef = useRef<HTMLDivElement>(null)
 
@@ -218,13 +220,17 @@ function ChatContent() {
             오늘의 탄소 토큰을 모두 사용했습니다.<br />
             챌린지를 완료하고 토큰을 회복하세요!
           </p>
-          {/* 챌린지 모달 연결은 issue #4에서 구현 */}
           <button
-            disabled
-            className="w-full bg-green-500 text-white font-semibold py-3 rounded-lg opacity-60 cursor-not-allowed"
+            onClick={() => setChallengeModalOpen(true)}
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors"
           >
             챌린지 시작하기
           </button>
+          <ChallengeModal
+            open={challengeModalOpen}
+            onClose={() => setChallengeModalOpen(false)}
+            onReward={(t) => updateRemainingTokens(t)}
+          />
         </div>
       </div>
     )
@@ -250,10 +256,9 @@ function ChatContent() {
                 </div>
                 <TokenBar remaining={isTokenLoading ? tokens.max : tokens.remaining} max={tokens.max} />
                 <div className="flex justify-end mt-2">
-                  {/* 챌린지 모달 연결은 issue #4에서 구현 */}
                   <button
-                    disabled
-                    className="flex items-center gap-1.5 text-xs font-medium text-green-600 bg-green-50 px-3 py-1.5 rounded-full opacity-60 cursor-not-allowed"
+                    onClick={() => setChallengeModalOpen(true)}
+                    className="flex items-center gap-1.5 text-xs font-medium text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-full transition-colors"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -409,6 +414,11 @@ function ChatContent() {
             </form>
           </div>
           <NavMenu hiddenOnDesktop />
+          <ChallengeModal
+            open={challengeModalOpen}
+            onClose={() => setChallengeModalOpen(false)}
+            onReward={(t) => updateRemainingTokens(t)}
+          />
         </div>
       )}
     </SidebarLayout>
