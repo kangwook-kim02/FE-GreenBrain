@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import ChatSidebar from './ChatSidebar'
 
 interface Props {
@@ -33,7 +33,9 @@ export default function SidebarLayout({ children }: Props) {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
-      <ChatSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Suspense>
+        <ChatSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      </Suspense>
       <div className="flex-1 flex flex-col overflow-hidden pb-16 sm:pb-0">
         {children(toggleButton)}
       </div>
