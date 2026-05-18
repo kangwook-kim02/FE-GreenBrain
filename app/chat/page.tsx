@@ -68,12 +68,15 @@ function ChatContent() {
     apiFetch<{ items: ChatMessageFromApi[] }>(`/api/chat/sessions/${sid}/messages`)
       .then((data) => {
         setMessages(
-          data.items.map((m) => ({
-            id: m.id,
-            role: m.role,
-            content: m.content,
-            carbonCost: m.role === 'assistant' ? m.carbon_gco2eq : undefined,
-          }))
+          data.items
+            .slice()
+            .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+            .map((m) => ({
+              id: m.id,
+              role: m.role,
+              content: m.content,
+              carbonCost: m.role === 'assistant' ? m.carbon_gco2eq : undefined,
+            }))
         )
       })
       .catch(() => {})
