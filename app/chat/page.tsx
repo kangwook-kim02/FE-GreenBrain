@@ -35,17 +35,23 @@ function getCarbonAnalogy(carbonCost: number): { icon: string; text: string } {
 
 function ChatContent() {
   const searchParams = useSearchParams()
-  const initialSid = searchParams.get('sid')
+  const sid = searchParams.get('sid')
   const { user, tokens, updateRemainingTokens } = useApp()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isTokenLoading, setIsTokenLoading] = useState(true)
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(initialSid)
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(sid)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const hasStarted = messages.length > 0
   const username = user?.nickname ?? '환경지킴이'
+
+  useEffect(() => {
+    setMessages([])
+    setInput('')
+    setCurrentSessionId(sid)
+  }, [sid])
 
   useEffect(() => {
     apiFetch<{ tokens_remaining: number }>('/api/tokens/today')
