@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { Suspense, useState, useRef, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import TokenBar from '@/components/TokenBar'
 import CarbonCard from '@/components/CarbonCard'
 import SidebarLayout from '@/components/SidebarLayout'
@@ -32,17 +33,25 @@ function getCarbonAnalogy(carbonCost: number): { icon: string; text: string } {
   return { icon: '🥤', text: '플라스틱 빨대 약 20개 생산' }
 }
 
-export default function ChatPage() {
+function ChatContent() {
+  const searchParams = useSearchParams()
+  const sid = searchParams.get('sid')
   const { user, tokens, updateRemainingTokens } = useApp()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isTokenLoading, setIsTokenLoading] = useState(true)
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(sid)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const hasStarted = messages.length > 0
   const username = user?.nickname ?? '환경지킴이'
+
+  useEffect(() => {
+    setMessages([])
+    setInput('')
+    setCurrentSessionId(sid)
+  }, [sid])
 
   useEffect(() => {
     apiFetch<{ tokens_remaining: number }>('/api/tokens/today')
@@ -259,5 +268,13 @@ export default function ChatPage() {
         </div>
       )}
     </SidebarLayout>
+  )
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense>
+      <ChatContent />
+    </Suspense>
   )
 }

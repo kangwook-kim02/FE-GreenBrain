@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
+import { apiFetch } from '@/lib/api'
 
 const HISTORY_GROUPS = [
   {
@@ -29,6 +31,7 @@ const HISTORY_GROUPS = [
 
 interface Props {
   open: boolean
+  onClose: () => void
 }
 
 const NAV_LINKS = [
@@ -53,9 +56,24 @@ const NAV_LINKS = [
   },
 ]
 
-export default function ChatSidebar({ open }: Props) {
+export default function ChatSidebar({ open, onClose }: Props) {
   const router = useRouter()
   const pathname = usePathname()
+  const [isCreating, setIsCreating] = useState(false)
+  const [createError, setCreateError] = useState('')
+
+  async function handleNewChat() {
+    setCreateError('')
+    setIsCreating(true)
+    try {
+      const session = await apiFetch<{ id: string; title: string | null }>('/api/chat/sessions', { method: 'POST' })
+      router.push(`/chat?sid=${session.id}`)
+    } catch {
+      setCreateError('새 채팅을 시작할 수 없습니다.')
+    } finally {
+      setIsCreating(false)
+    }
+  }
 
   return (
     <aside
@@ -64,25 +82,36 @@ export default function ChatSidebar({ open }: Props) {
       }`}
     >
       <div className="w-64 flex flex-col h-full">
-        <div className="flex items-center gap-2 px-4 py-4 border-b border-gray-700">
-          <span className="text-lg">🌱</span>
-          <span className="font-bold text-green-400 text-lg">GreenBrain</span>
+        <div className="flex items-center justify-between px-4 py-4 border-b border-gray-700">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">🌱</span>
+            <span className="font-bold text-green-400 text-lg">GreenBrain</span>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors rounded-lg p-1 hover:bg-gray-700"
+            aria-label="사이드바 닫기"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
         <div className="p-3 space-y-1 border-b border-gray-700">
           <button
-            onClick={() => router.push('/chat')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm ${
-              pathname === '/chat'
-                ? 'bg-gray-700 text-white font-semibold border-l-2 border-green-400 pl-[10px]'
-                : 'text-gray-300 hover:text-white hover:bg-gray-700'
-            }`}
+            onClick={() => handleNewChat()}
+            disabled={isCreating}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm text-gray-300 hover:text-white hover:bg-gray-700 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            새 채팅
+            {isCreating ? '생성 중...' : '새 채팅'}
           </button>
+          {createError && (
+            <p className="px-3 mt-1 text-xs text-red-400">{createError}</p>
+          )}
 
           {NAV_LINKS.map((item) => {
             const active = pathname === item.href

@@ -46,13 +46,21 @@ export default function NavMenu({ hiddenOnDesktop = false }: { hiddenOnDesktop?:
   const pathname = usePathname()
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false)
+    const handler = (e: MouseEvent | KeyboardEvent) => {
+      if (e instanceof KeyboardEvent) {
+        if (e.key === 'Escape') setOpen(false)
+      } else {
+        if (ref.current && !ref.current.contains(e.target as Node)) {
+          setOpen(false)
+        }
       }
     }
     document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    document.addEventListener('keydown', handler)
+    return () => {
+      document.removeEventListener('mousedown', handler)
+      document.removeEventListener('keydown', handler)
+    }
   }, [])
 
   return (
@@ -60,6 +68,7 @@ export default function NavMenu({ hiddenOnDesktop = false }: { hiddenOnDesktop?:
       <div className={`relative ${hiddenOnDesktop ? 'hidden' : 'hidden sm:block'}`} ref={ref}>
         <button
           onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
           className="flex flex-col justify-center gap-1.5 w-9 h-9 items-center rounded-lg hover:bg-gray-100 transition-colors"
           aria-label="메뉴 열기"
         >
