@@ -15,16 +15,32 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
     ...headers,
   }
 
-  const response = await fetch(`${BASE_URL}${path}`, {
-    ...rest,
-    headers: requestHeaders,
-    body: isFormData ? body : body ? JSON.stringify(body) : undefined,
-    credentials: 'include',
-  })
+  let response: Response
+  try {
+    response = await fetch(`${BASE_URL}${path}`, {
+      ...rest,
+      headers: requestHeaders,
+      body: isFormData ? body : body ? JSON.stringify(body) : undefined,
+      credentials: 'include',
+    })
+  } catch {
+    toast.error('인터넷 연결을 확인해주세요')
+    throw new Error('Network error')
+  }
 
   if (response.status === 401 && !path.startsWith('/api/auth/')) {
     window.location.href = '/login'
     throw new Error('Unauthorized')
+  }
+
+  if (response.status === 403) {
+    const data = await response.json().catch(() => ({}))
+    throw { status: 403, data }
+  }
+
+  if (response.status === 422) {
+    const data = await response.json().catch(() => ({}))
+    throw { status: 422, data }
   }
 
   if (response.status === 500) {
