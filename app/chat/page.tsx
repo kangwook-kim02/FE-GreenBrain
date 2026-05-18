@@ -9,6 +9,41 @@ import NavMenu from '@/components/NavMenu'
 import { useApp } from '@/contexts/AppContext'
 import { apiFetch } from '@/lib/api'
 
+interface Model {
+  label: string
+  value: string
+  provider: string
+}
+
+const MODELS: Model[] = [
+  { label: 'claude-opus-4-7',       value: 'anthropic/claude-opus-4-7',       provider: 'Anthropic' },
+  { label: 'claude-opus-4-6',       value: 'anthropic/claude-opus-4-6',       provider: 'Anthropic' },
+  { label: 'claude-sonnet-4-6',     value: 'anthropic/claude-sonnet-4-6',     provider: 'Anthropic' },
+  { label: 'claude-sonnet-4-5',     value: 'anthropic/claude-sonnet-4-5',     provider: 'Anthropic' },
+  { label: 'claude-3.7-sonnet',     value: 'anthropic/claude-3.7-sonnet',     provider: 'Anthropic' },
+  { label: 'claude-haiku-4-5',      value: 'anthropic/claude-haiku-4-5',      provider: 'Anthropic' },
+  { label: 'claude-3.5-haiku',      value: 'anthropic/claude-3.5-haiku',      provider: 'Anthropic' },
+  { label: 'gpt-5.5',               value: 'openai/gpt-5.5',                  provider: 'OpenAI' },
+  { label: 'gpt-5.5-pro',           value: 'openai/gpt-5.5-pro',              provider: 'OpenAI' },
+  { label: 'gpt-5.4',               value: 'openai/gpt-5.4',                  provider: 'OpenAI' },
+  { label: 'gpt-5.4-pro',           value: 'openai/gpt-5.4-pro',              provider: 'OpenAI' },
+  { label: 'gpt-5.4-mini',          value: 'openai/gpt-5.4-mini',             provider: 'OpenAI' },
+  { label: 'gpt-5.4-nano',          value: 'openai/gpt-5.4-nano',             provider: 'OpenAI' },
+  { label: 'gpt-5-mini',            value: 'openai/gpt-5-mini',               provider: 'OpenAI' },
+  { label: 'gpt-5-nano',            value: 'openai/gpt-5-nano',               provider: 'OpenAI' },
+  { label: 'gpt-5',                 value: 'openai/gpt-5',                    provider: 'OpenAI' },
+  { label: 'gpt-4.1',               value: 'openai/gpt-4.1',                  provider: 'OpenAI' },
+  { label: 'gemini-3.1-pro',        value: 'google/gemini-3.1-pro',           provider: 'Google' },
+  { label: 'gemini-3-flash-preview', value: 'google/gemini-3-flash-preview',  provider: 'Google' },
+  { label: 'gemini-2.5-pro',        value: 'google/gemini-2.5-pro',           provider: 'Google' },
+  { label: 'gemini-2.5-flash',      value: 'google/gemini-2.5-flash',         provider: 'Google' },
+  { label: 'gemini-2.5-flash-lite', value: 'google/gemini-2.5-flash-lite',    provider: 'Google' },
+  { label: 'gemma-3-27b',           value: 'google/gemma-3-27b',              provider: 'Google' },
+]
+
+const MODEL_PROVIDERS = ['Anthropic', 'OpenAI', 'Google'] as const
+const DEFAULT_MODEL = 'anthropic/claude-sonnet-4-6'
+
 interface Message {
   id: string
   role: 'user' | 'assistant'
@@ -53,7 +88,10 @@ function ChatContent() {
   const [isHistoryLoading, setIsHistoryLoading] = useState(false)
   const [historyError, setHistoryError] = useState(false)
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(sid)
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
+  const [modelDropdownOpen, setModelDropdownOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const modelDropdownRef = useRef<HTMLDivElement>(null)
 
   const hasStarted = messages.length > 0
   const username = user?.nickname ?? '환경지킴이'
@@ -92,6 +130,17 @@ function ChatContent() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    if (!modelDropdownOpen) return
+    const handler = (e: MouseEvent) => {
+      if (modelDropdownRef.current && !modelDropdownRef.current.contains(e.target as Node)) {
+        setModelDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [modelDropdownOpen])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -287,22 +336,76 @@ function ChatContent() {
           )}
 
           <div className="bg-white border-t border-gray-200 p-4 flex-shrink-0">
-            <form onSubmit={handleSubmit} className="max-w-4xl mx-auto flex gap-3">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={hasStarted ? '메시지를 입력하세요.' : '오늘 어떤 도움을 드릴까요?'}
-                disabled={isHistoryLoading || isTokenLoading || tokens.remaining <= 0 || isLoading}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none disabled:bg-gray-100"
-              />
-              <button
-                type="submit"
-                disabled={isHistoryLoading || isTokenLoading || !input.trim() || tokens.remaining <= 0 || isLoading}
-                className="px-6 py-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
-              >
-                전송
-              </button>
+            <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
+              <div className="flex gap-3 mb-2">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={hasStarted ? '메시지를 입력하세요.' : '오늘 어떤 도움을 드릴까요?'}
+                  disabled={isHistoryLoading || isTokenLoading || tokens.remaining <= 0 || isLoading}
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none disabled:bg-gray-100"
+                />
+                <button
+                  type="submit"
+                  disabled={isHistoryLoading || isTokenLoading || !input.trim() || tokens.remaining <= 0 || isLoading}
+                  className="px-6 py-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
+                >
+                  전송
+                </button>
+              </div>
+
+              <div className="relative" ref={modelDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setModelDropdownOpen((v) => !v)}
+                  className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
+                >
+                  <span className="font-medium">
+                    {MODELS.find((m) => m.value === selectedModel)?.label}
+                  </span>
+                  <svg
+                    className={`w-3.5 h-3.5 transition-transform duration-150 ${modelDropdownOpen ? 'rotate-180' : ''}`}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {modelDropdownOpen && (
+                  <div className="absolute bottom-full left-0 mb-1 w-60 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50 max-h-72 overflow-y-auto">
+                    {MODEL_PROVIDERS.map((provider) => (
+                      <div key={provider}>
+                        <p className="px-3 pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                          {provider}
+                        </p>
+                        {MODELS.filter((m) => m.provider === provider).map((model) => (
+                          <button
+                            key={model.value}
+                            type="button"
+                            onClick={() => {
+                              setSelectedModel(model.value)
+                              setModelDropdownOpen(false)
+                            }}
+                            className={`w-full text-left px-4 py-2 text-sm transition-colors flex items-center justify-between ${
+                              selectedModel === model.value
+                                ? 'bg-green-50 text-green-700 font-semibold'
+                                : 'text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            {model.label}
+                            {selectedModel === model.value && (
+                              <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </form>
           </div>
           <NavMenu hiddenOnDesktop />
