@@ -51,6 +51,7 @@ function ChatContent() {
   const [isLoading, setIsLoading] = useState(false)
   const [isTokenLoading, setIsTokenLoading] = useState(true)
   const [isHistoryLoading, setIsHistoryLoading] = useState(false)
+  const [historyError, setHistoryError] = useState(false)
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(sid)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -60,6 +61,7 @@ function ChatContent() {
   useEffect(() => {
     setMessages([])
     setInput('')
+    setHistoryError(false)
     setCurrentSessionId(sid)
 
     if (!sid) return
@@ -76,7 +78,7 @@ function ChatContent() {
           }))
         )
       })
-      .catch(() => {})
+      .catch(() => setHistoryError(true))
       .finally(() => setIsHistoryLoading(false))
   }, [sid])
 
@@ -222,6 +224,10 @@ function ChatContent() {
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
               </div>
+            </div>
+          ) : historyError ? (
+            <div className="flex-1 flex items-center justify-center p-8 text-center">
+              <p className="text-sm text-red-400">대화 내역을 불러올 수 없습니다. 잠시 후 다시 시도해주세요.</p>
             </div>
           ) : !hasStarted ? (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">

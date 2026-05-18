@@ -51,6 +51,7 @@ function groupSessionsByDate(sessions: ChatSession[]) {
     { label: '오늘', items: [] },
     { label: '어제', items: [] },
     { label: '이전 7일', items: [] },
+    { label: '오래된 대화', items: [] },
   ]
 
   for (const s of sessions) {
@@ -58,6 +59,7 @@ function groupSessionsByDate(sessions: ChatSession[]) {
     if (d >= startOfToday) groups[0].items.push(s)
     else if (d >= startOfYesterday) groups[1].items.push(s)
     else if (d >= startOf7DaysAgo) groups[2].items.push(s)
+    else groups[3].items.push(s)
   }
 
   return groups.filter((g) => g.items.length > 0)
