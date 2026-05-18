@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ChatSidebar from './ChatSidebar'
 
 interface Props {
@@ -10,9 +10,18 @@ interface Props {
 export default function SidebarLayout({ children }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSidebarOpen(false)
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [])
+
   const toggleButton = (
     <button
       onClick={() => setSidebarOpen((v) => !v)}
+      aria-expanded={sidebarOpen}
       className="hidden sm:flex flex-col justify-center gap-1.5 w-9 h-9 items-center flex-shrink-0 rounded-lg hover:bg-gray-100 transition-colors"
       aria-label="사이드바 열기/닫기"
     >
