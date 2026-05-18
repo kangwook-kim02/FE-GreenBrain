@@ -1,33 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { apiFetch } from '@/lib/api'
 
-const HISTORY_GROUPS = [
-  {
-    label: '오늘',
-    items: [
-      { id: 'h1', title: '탄소 발자국 줄이는 방법' },
-      { id: 'h2', title: '채식 식단의 환경 영향' },
-    ],
-  },
-  {
-    label: '어제',
-    items: [
-      { id: 'h3', title: '대중교통 vs 자가용 탄소 비교' },
-    ],
-  },
-  {
-    label: '이전 7일',
-    items: [
-      { id: 'h4', title: '에너지 절약 실천 방법' },
-      { id: 'h5', title: '플라스틱 사용 줄이기' },
-      { id: 'h6', title: '친환경 소비 패턴 분석' },
-    ],
-  },
-]
+interface ChatSession {
+  id: string
+  title: string | null
+  created_at: string
+  updated_at: string
+}
 
 interface Props {
   open: boolean
@@ -56,11 +39,41 @@ const NAV_LINKS = [
   },
 ]
 
+function groupSessionsByDate(sessions: ChatSession[]) {
+  const now = new Date()
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const startOfYesterday = new Date(startOfToday)
+  startOfYesterday.setDate(startOfYesterday.getDate() - 1)
+  const startOf7DaysAgo = new Date(startOfToday)
+  startOf7DaysAgo.setDate(startOf7DaysAgo.getDate() - 7)
+
+  const groups: { label: string; items: ChatSession[] }[] = [
+    { label: '오늘', items: [] },
+    { label: '어제', items: [] },
+    { label: '이전 7일', items: [] },
+  ]
+
+  for (const s of sessions) {
+    const d = new Date(s.updated_at)
+    if (d >= startOfToday) groups[0].items.push(s)
+    else if (d >= startOfYesterday) groups[1].items.push(s)
+    else if (d >= startOf7DaysAgo) groups[2].items.push(s)
+  }
+
+  return groups.filter((g) => g.items.length > 0)
+}
+
 export default function ChatSidebar({ open, onClose }: Props) {
   const router = useRouter()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const currentSid = searchParams.get('sid')
+
   const [isCreating, setIsCreating] = useState(false)
   const [createError, setCreateError] = useState('')
+  const [sessions, setSessions] = useState<ChatSession[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [sessionsError, setSessionsError] = useState('')
 
   async function handleNewChat() {
     setCreateError('')
@@ -74,6 +87,27 @@ export default function ChatSidebar({ open, onClose }: Props) {
       setIsCreating(false)
     }
   }
+
+  useEffect(() => {
+    apiFetch<{ items: ChatSession[] }>('/api/chat/sessions')
+      .then((data) => setSessions(data.items))
+      .catch(() => setSessionsError('세션 목록을 불러올 수 없습니다.'))
+      .finally(() => setIsLoading(false))
+  }, [])
+
+  async function handleDelete(e: React.MouseEvent, sessionId: string) {
+    e.stopPropagation()
+    const prev = sessions
+    setSessions((s) => s.filter((x) => x.id !== sessionId))
+    try {
+      await apiFetch(`/api/chat/sessions/${sessionId}`, { method: 'DELETE' })
+      if (currentSid === sessionId) router.push('/chat')
+    } catch {
+      setSessions(prev)
+    }
+  }
+
+  const groups = groupSessionsByDate(sessions)
 
   return (
     <aside
@@ -133,22 +167,59 @@ export default function ChatSidebar({ open, onClose }: Props) {
         </div>
 
         <div className="flex-1 overflow-y-auto py-2">
-          {HISTORY_GROUPS.map((group) => (
+          {isLoading && (
+            <div className="space-y-1 px-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="animate-pulse px-3 py-2">
+                  <div className="h-4 bg-gray-700 rounded w-3/4" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {sessionsError && (
+            <p className="px-4 py-2 text-xs text-red-400">{sessionsError}</p>
+          )}
+
+          {!isLoading && !sessionsError && groups.length === 0 && (
+            <p className="px-4 py-4 text-xs text-gray-500 text-center">대화 기록이 없습니다</p>
+          )}
+
+          {!isLoading && groups.map((group) => (
             <div key={group.label} className="mb-2">
               <p className="px-4 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 {group.label}
               </p>
-              {group.items.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => router.push('/chat')}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg mx-1 transition-colors truncate"
-                  style={{ maxWidth: 'calc(100% - 8px)' }}
-                  title={item.title}
-                >
-                  {item.title}
-                </button>
-              ))}
+              {group.items.map((session) => {
+                const active = currentSid === session.id
+                return (
+                  <div
+                    key={session.id}
+                    className={`group relative flex items-center mx-1 rounded-lg transition-colors cursor-pointer ${
+                      active
+                        ? 'bg-gray-700 border-l-2 border-green-400'
+                        : 'hover:bg-gray-700'
+                    }`}
+                  >
+                    <button
+                      onClick={() => router.push(`/chat?sid=${session.id}`)}
+                      className="flex-1 min-w-0 text-left px-3 py-2 text-sm text-gray-300 group-hover:text-white truncate"
+                      title={session.title ?? '새 채팅'}
+                    >
+                      {session.title ?? '새 채팅'}
+                    </button>
+                    <button
+                      onClick={(e) => handleDelete(e, session.id)}
+                      className="hidden group-hover:flex items-center justify-center w-8 h-8 text-gray-400 hover:text-red-400 transition-colors flex-shrink-0"
+                      aria-label="세션 삭제"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                )
+              })}
             </div>
           ))}
         </div>
