@@ -16,14 +16,7 @@ interface Model {
 }
 
 const MODELS: Model[] = [
-  { label: 'claude-opus-4-7',       value: 'anthropic/claude-opus-4-7',       provider: 'Anthropic' },
-  { label: 'claude-opus-4-6',       value: 'anthropic/claude-opus-4-6',       provider: 'Anthropic' },
-  { label: 'claude-sonnet-4-6',     value: 'anthropic/claude-sonnet-4-6',     provider: 'Anthropic' },
-  { label: 'claude-sonnet-4-5',     value: 'anthropic/claude-sonnet-4-5',     provider: 'Anthropic' },
-  { label: 'claude-3.7-sonnet',     value: 'anthropic/claude-3.7-sonnet',     provider: 'Anthropic' },
-  { label: 'claude-haiku-4-5',      value: 'anthropic/claude-haiku-4-5',      provider: 'Anthropic' },
-  { label: 'claude-3.5-haiku',      value: 'anthropic/claude-3.5-haiku',      provider: 'Anthropic' },
-  { label: 'gpt-5.5',               value: 'openai/gpt-5.5',                  provider: 'OpenAI' },
+  { label: 'GPT-5.5',               value: 'openai/gpt-5.5',                  provider: 'OpenAI' },
   { label: 'gpt-5.5-pro',           value: 'openai/gpt-5.5-pro',              provider: 'OpenAI' },
   { label: 'gpt-5.4',               value: 'openai/gpt-5.4',                  provider: 'OpenAI' },
   { label: 'gpt-5.4-pro',           value: 'openai/gpt-5.4-pro',              provider: 'OpenAI' },
@@ -39,10 +32,17 @@ const MODELS: Model[] = [
   { label: 'gemini-2.5-flash',      value: 'google/gemini-2.5-flash',         provider: 'Google' },
   { label: 'gemini-2.5-flash-lite', value: 'google/gemini-2.5-flash-lite',    provider: 'Google' },
   { label: 'gemma-3-27b',           value: 'google/gemma-3-27b',              provider: 'Google' },
+  { label: 'claude-opus-4-7',       value: 'anthropic/claude-opus-4-7',       provider: 'Anthropic' },
+  { label: 'claude-opus-4-6',       value: 'anthropic/claude-opus-4-6',       provider: 'Anthropic' },
+  { label: 'claude-sonnet-4-6',     value: 'anthropic/claude-sonnet-4-6',     provider: 'Anthropic' },
+  { label: 'claude-sonnet-4-5',     value: 'anthropic/claude-sonnet-4-5',     provider: 'Anthropic' },
+  { label: 'claude-3.7-sonnet',     value: 'anthropic/claude-3.7-sonnet',     provider: 'Anthropic' },
+  { label: 'claude-haiku-4-5',      value: 'anthropic/claude-haiku-4-5',      provider: 'Anthropic' },
+  { label: 'claude-3.5-haiku',      value: 'anthropic/claude-3.5-haiku',      provider: 'Anthropic' },
 ]
 
 const MODEL_PROVIDERS = ['Anthropic', 'OpenAI', 'Google'] as const
-const DEFAULT_MODEL = 'anthropic/claude-sonnet-4-6'
+const DEFAULT_MODEL = 'openai/gpt-5.5'
 
 interface Message {
   id: string
