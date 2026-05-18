@@ -41,7 +41,7 @@ const MODELS: Model[] = [
   { label: 'Claude-3.5-Haiku',      value: 'anthropic/claude-3.5-haiku',      provider: 'Anthropic' },
 ]
 
-const MODEL_PROVIDERS = ['Anthropic', 'OpenAI', 'Google'] as const
+const MODEL_PROVIDERS = ['OpenAI', 'Anthropic',  'Google'] as const
 const DEFAULT_MODEL = 'openai/gpt-5.5'
 
 interface Message {
