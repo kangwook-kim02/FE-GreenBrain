@@ -1,64 +1,47 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import SidebarLayout from '@/components/SidebarLayout'
 import NavMenu from '@/components/NavMenu'
 import SkeletonCard from '../../../components/SkeletonCard'
 import EmptyState from '../../../components/EmptyState'
+import { useApp } from '@/contexts/AppContext'
+import { apiFetch } from '@/lib/api'
 
 interface FeedItem {
-  id: string
-  userId: string
-  username: string
-  challengeTitle: string
-  imageUrl: string
-  likes: number
-  likedByMe: boolean
-  isOwner: boolean
-  timestamp: string
+  photo_id: string
+  challenge_id: string
+  user_id: string
+  nickname: string | null
+  profile_image_url: string | null
+  title: string
+  category: 'transport' | 'diet' | 'energy'
+  photo_url: string
+  like_count: number
+  liked_by_me: boolean
+  carbon_saved_gco2eq: number | null
+  created_at: string
 }
 
-const MOCK_FEED: FeedItem[] = [
-  {
-    id: '1',
-    userId: 'u1',
-    username: '김현진',
-    challengeTitle: '대중교통으로 출퇴근하기',
-    imageUrl: '/placeholder-feed.jpg',
-    likes: 5,
-    likedByMe: false,
-    isOwner: false,
-    timestamp: '2026-05-14T10:30:00Z',
-  },
-  {
-    id: '2',
-    userId: 'u2',
-    username: '이승호',
-    challengeTitle: '채식 식단 도전',
-    imageUrl: '/placeholder-feed.jpg',
-    likes: 12,
-    likedByMe: true,
-    isOwner: false,
-    timestamp: '2026-05-14T09:15:00Z',
-  },
-  {
-    id: '3',
-    userId: 'me',
-    username: '나',
-    challengeTitle: '에너지 절약하기',
-    imageUrl: '/placeholder-feed.jpg',
-    likes: 3,
-    likedByMe: false,
-    isOwner: true,
-    timestamp: '2026-05-14T08:00:00Z',
-  },
-]
+interface FeedResponse {
+  items: FeedItem[]
+  total: number | null
+  limit: number
+  offset: number
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  transport: '교통',
+  diet: '식단',
+  energy: '에너지',
+}
 
 function formatTime(timestamp: string): string {
   const date = new Date(timestamp)
   const now = new Date()
   const diffMs = now.getTime() - date.getTime()
   const diffMin = Math.floor(diffMs / 60000)
+  if (diffMin < 1) return '방금 전'
   if (diffMin < 60) return `${diffMin}분 전`
   const diffHour = Math.floor(diffMin / 60)
   if (diffHour < 24) return `${diffHour}시간 전`
@@ -67,25 +50,40 @@ function formatTime(timestamp: string): string {
 
 function FeedCard({
   item,
+  isOwner,
   onDelete,
+  onLikeToggle,
 }: {
   item: FeedItem
-  onDelete: (id: string) => void
+  isOwner: boolean
+  onDelete: (photoId: string) => void
+  onLikeToggle: (photoId: string) => Promise<void>
 }) {
-  const [likes, setLikes] = useState(item.likes)
-  const [likedByMe, setLikedByMe] = useState(item.likedByMe)
+  const [likeCount, setLikeCount] = useState(item.like_count)
+  const [likedByMe, setLikedByMe] = useState(item.liked_by_me)
+  const [likeLoading, setLikeLoading] = useState(false)
+  const [likeError, setLikeError] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
-  function handleLike() {
-    if (likedByMe || item.isOwner) return
+  async function handleLike() {
+    if (likedByMe || isOwner || likeLoading) return
+    setLikeError('')
+    setLikeLoading(true)
     setLikedByMe(true)
-    setLikes((prev) => prev + 1)
-    // API 연동은 후속 이슈에서 구현
+    setLikeCount((prev) => prev + 1)
+    try {
+      await onLikeToggle(item.photo_id)
+    } catch {
+      setLikedByMe(false)
+      setLikeCount((prev) => prev - 1)
+      setLikeError('좋아요에 실패했습니다.')
+    } finally {
+      setLikeLoading(false)
+    }
   }
 
   function handleDelete() {
-    // API 연동은 후속 이슈에서 구현
-    onDelete(item.id)
+    onDelete(item.photo_id)
     setShowDeleteConfirm(false)
   }
 
@@ -94,12 +92,20 @@ function FeedCard({
       <div className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center text-green-700 text-sm font-semibold">
-              {item.username[0]}
-            </div>
+            {item.profile_image_url ? (
+              <img
+                src={item.profile_image_url}
+                alt={item.nickname ?? ''}
+                className="w-9 h-9 rounded-full object-cover bg-gray-100"
+              />
+            ) : (
+              <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center text-green-700 text-sm font-semibold">
+                {(item.nickname ?? '?')[0]}
+              </div>
+            )}
             <div>
-              <p className="text-sm font-semibold text-gray-900">{item.username}</p>
-              <p className="text-xs text-gray-500">{formatTime(item.timestamp)}</p>
+              <p className="text-sm font-semibold text-gray-900">{item.nickname ?? '익명'}</p>
+              <p className="text-xs text-gray-500">{formatTime(item.created_at)}</p>
             </div>
           </div>
 
@@ -107,18 +113,18 @@ function FeedCard({
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>{item.challengeTitle}</span>
+            <span>{item.title}</span>
           </div>
         </div>
       </div>
 
       <div className="relative">
         <img
-          src={item.imageUrl}
-          alt={item.challengeTitle}
+          src={item.photo_url}
+          alt={item.title}
           className="w-full aspect-square object-cover bg-gray-100"
         />
-        {item.isOwner && !showDeleteConfirm && (
+        {isOwner && !showDeleteConfirm && (
           <button
             onClick={() => setShowDeleteConfirm(true)}
             className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 text-gray-500 hover:text-red-500 transition-colors"
@@ -152,39 +158,74 @@ function FeedCard({
       )}
 
       <div className="px-4 py-3">
-        <button
-          onClick={handleLike}
-          disabled={likedByMe || item.isOwner}
-          className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
-            likedByMe
-              ? 'text-green-600 cursor-default'
-              : item.isOwner
-                ? 'text-gray-400 cursor-default'
-                : 'text-gray-500 hover:text-green-600'
-          }`}
-        >
-          <svg
-            className="w-5 h-5"
-            fill={likedByMe ? 'currentColor' : 'none'}
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <div className="flex items-center justify-between">
+          <button
+            onClick={handleLike}
+            disabled={likedByMe || isOwner || likeLoading}
+            className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
+              likedByMe
+                ? 'text-green-600 cursor-default'
+                : isOwner
+                  ? 'text-gray-400 cursor-default'
+                  : 'text-gray-500 hover:text-green-600'
+            }`}
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-          <span>{likes}</span>
-        </button>
+            <svg
+              className="w-5 h-5"
+              fill={likedByMe ? 'currentColor' : 'none'}
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <span>{likeCount}</span>
+          </button>
+          {item.carbon_saved_gco2eq != null && (
+            <span className="text-xs text-gray-400">
+              -{item.carbon_saved_gco2eq}g CO₂
+            </span>
+          )}
+        </div>
+        {likeError && <p className="text-xs text-red-500 mt-1">{likeError}</p>}
       </div>
     </div>
   )
 }
 
 export default function ChallengeFeedPage() {
-  const [feedItems, setFeedItems] = useState<FeedItem[]>(MOCK_FEED)
-  // setIsLoading은 issue #15 API 연동 시 사용
-  const [isLoading, setIsLoading] = useState(false)
+  const { user } = useApp()
+  const [feedItems, setFeedItems] = useState<FeedItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  function handleDelete(id: string) {
-    setFeedItems((prev) => prev.filter((item) => item.id !== id))
+  const loadFeed = useCallback(async () => {
+    setError('')
+    setIsLoading(true)
+    try {
+      const data = await apiFetch<FeedResponse>('/api/challenges/feed?limit=20&offset=0')
+      setFeedItems(data.items)
+    } catch {
+      setError('피드를 불러오지 못했습니다.')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadFeed()
+  }, [loadFeed])
+
+  async function handleLikeToggle(photoId: string): Promise<void> {
+    await apiFetch('/api/challenge-photos/' + photoId + '/like', { method: 'POST' })
+  }
+
+  async function handleDelete(photoId: string) {
+    try {
+      await apiFetch('/api/challenge-photos/' + photoId, { method: 'DELETE' })
+      setFeedItems((prev) => prev.filter((item) => item.photo_id !== photoId))
+    } catch {
+      setError('게시물 삭제에 실패했습니다.')
+    }
   }
 
   return (
@@ -203,7 +244,7 @@ export default function ChallengeFeedPage() {
             <div className="max-w-4xl mx-auto px-4 py-6">
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
                 <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
                   <p className="text-sm text-green-700">
@@ -211,6 +252,18 @@ export default function ChallengeFeedPage() {
                   </p>
                 </div>
               </div>
+
+              {error && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
+                  <p className="text-sm text-red-700">{error}</p>
+                  <button
+                    onClick={loadFeed}
+                    className="text-sm text-red-600 font-semibold hover:text-red-700 ml-3 shrink-0"
+                  >
+                    재시도
+                  </button>
+                </div>
+              )}
 
               {isLoading ? (
                 <div className="space-y-4">
@@ -222,13 +275,18 @@ export default function ChallengeFeedPage() {
                 <EmptyState
                   message="아직 인증된 챌린지가 없습니다"
                   ctaLabel="챌린지 참여하기"
-                  // TODO(issue #15): API 연동 시 챌린지 참여 화면으로 이동
                   onCta={() => {}}
                 />
               ) : (
                 <div className="space-y-4">
                   {feedItems.map((item) => (
-                    <FeedCard key={item.id} item={item} onDelete={handleDelete} />
+                    <FeedCard
+                      key={item.photo_id}
+                      item={item}
+                      isOwner={user?.id === item.user_id}
+                      onDelete={handleDelete}
+                      onLikeToggle={handleLikeToggle}
+                    />
                   ))}
                 </div>
               )}
