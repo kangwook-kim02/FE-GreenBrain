@@ -135,16 +135,14 @@ export default function ChallengeModal({ open, onClose, onReward }: ChallengeMod
     setIsUploading(true)
     setFileError('')
     const formData = new FormData()
-    formData.append('file', selectedFile)
+    formData.append('photo', selectedFile)
 
     try {
-      const data = await apiFetch<{
-        reward: { tokens_remaining: number }
-      }>(`/api/challenges/${challenge.id}/photo`, {
-        method: 'POST',
-        body: formData,
-      })
-      onReward?.(data.reward.tokens_remaining)
+      const data = await apiFetch<{ remaining_tokens: number }>(
+        `/api/challenges/${challenge.id}/verify`,
+        { method: 'POST', body: formData }
+      )
+      onReward?.(data.remaining_tokens)
       handleClose()
     } catch {
       setFileError('업로드에 실패했습니다. 다시 시도해주세요.')
