@@ -70,7 +70,7 @@ function ChatContent() {
         setMessages(
           data.items
             .slice()
-            .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+            .reverse()
             .map((m) => ({
               id: m.id,
               role: m.role,
