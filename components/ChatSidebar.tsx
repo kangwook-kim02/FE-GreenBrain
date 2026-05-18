@@ -33,7 +33,7 @@ interface Props {
 
 const NAV_LINKS = [
   {
-    to: '/challenges/feed',
+    href: '/challenges/feed',
     label: '챌린지 피드',
     icon: (
       <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,7 +42,7 @@ const NAV_LINKS = [
     ),
   },
   {
-    to: '/profile',
+    href: '/profile',
     label: '프로필',
     icon: (
       <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,11 +85,11 @@ export default function ChatSidebar({ open }: Props) {
           </button>
 
           {NAV_LINKS.map((item) => {
-            const active = pathname === item.to
+            const active = pathname === item.href
             return (
               <Link
-                key={item.to}
-                href={item.to}
+                key={item.href}
+                href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm ${
                   active
                     ? 'bg-gray-700 text-white font-semibold border-l-2 border-green-400 pl-[10px]'
