@@ -78,6 +78,7 @@ export default function ChatSidebar({ open, onClose }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingTitle, setEditingTitle] = useState('')
   const editInputRef = useRef<HTMLInputElement>(null)
+  const sessionsListRef = useRef<HTMLDivElement>(null)
 
   async function handleNewChat() {
     setCreateError('')
@@ -95,7 +96,10 @@ export default function ChatSidebar({ open, onClose }: Props) {
   // currentSid가 바뀔 때(새 세션 생성·세션 전환) 목록을 재조회한다
   useEffect(() => {
     apiFetch<{ items: ChatSession[] }>('/api/chat/sessions')
-      .then((data) => setSessions(data.items))
+      .then((data) => {
+        setSessions(data.items)
+        setSessionsError('')
+      })
       .catch(() => setSessionsError('세션 목록을 불러올 수 없습니다.'))
       .finally(() => setIsLoading(false))
   }, [currentSid])
@@ -128,11 +132,20 @@ export default function ChatSidebar({ open, onClose }: Props) {
     }
   }
 
-  function handleContextMenu(e: React.MouseEvent, sessionId: string) {
-    e.preventDefault()
-    e.stopPropagation()
-    setContextMenu({ sessionId, x: e.clientX, y: e.clientY })
-  }
+  // React onContextMenu는 브라우저 기본 메뉴를 막지 못하는 경우가 있어 네이티브 리스너 사용
+  useEffect(() => {
+    const el = sessionsListRef.current
+    if (!el) return
+    const handler = (e: MouseEvent) => {
+      const target = (e.target as Element).closest('[data-session-id]')
+      if (!target) return
+      e.preventDefault()
+      const sessionId = target.getAttribute('data-session-id')!
+      setContextMenu({ sessionId, x: e.clientX, y: e.clientY })
+    }
+    el.addEventListener('contextmenu', handler)
+    return () => el.removeEventListener('contextmenu', handler)
+  }, [])
 
   function handleStartEdit(sessionId: string) {
     const session = sessions.find((s) => s.id === sessionId)
@@ -242,7 +255,7 @@ export default function ChatSidebar({ open, onClose }: Props) {
           })}
         </div>
 
-        <div className="flex-1 overflow-y-auto py-2">
+        <div ref={sessionsListRef} className="flex-1 overflow-y-auto py-2">
           {isLoading && (
             <div className="space-y-1 px-2">
               {[1, 2, 3].map((i) => (
@@ -272,7 +285,7 @@ export default function ChatSidebar({ open, onClose }: Props) {
                 return (
                   <div
                     key={session.id}
-                    onContextMenu={(e) => handleContextMenu(e, session.id)}
+                    data-session-id={session.id}
                     className={`group relative flex items-center mx-1 rounded-lg transition-colors cursor-pointer ${
                       active
                         ? 'bg-gray-700 border-l-2 border-green-400'
