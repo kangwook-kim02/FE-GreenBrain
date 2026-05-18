@@ -102,11 +102,7 @@ export default function ChatSidebar({ open, onClose }: Props) {
           <button
             onClick={() => handleNewChat()}
             disabled={isCreating}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed ${
-              pathname === '/chat'
-                ? 'bg-gray-700 text-white font-semibold border-l-2 border-green-400 pl-[10px]'
-                : 'text-gray-300 hover:text-white hover:bg-gray-700'
-            }`}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm text-gray-300 hover:text-white hover:bg-gray-700 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
