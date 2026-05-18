@@ -26,6 +26,15 @@ interface ChatMessageResponse {
   session_title: string | null
 }
 
+interface ChatMessageFromApi {
+  id: string
+  session_id: string
+  role: 'user' | 'assistant'
+  content: string
+  carbon_gco2eq: number | null
+  created_at: string
+}
+
 function getCarbonAnalogy(carbonCost: number): { icon: string; text: string } {
   if (carbonCost <= 3) return { icon: '🚗', text: '자동차 약 10초 주행' }
   if (carbonCost <= 5) return { icon: '💡', text: 'LED 전구 약 30분 사용' }
@@ -41,6 +50,8 @@ function ChatContent() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isTokenLoading, setIsTokenLoading] = useState(true)
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false)
+  const [historyError, setHistoryError] = useState(false)
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(sid)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -50,7 +61,25 @@ function ChatContent() {
   useEffect(() => {
     setMessages([])
     setInput('')
+    setHistoryError(false)
     setCurrentSessionId(sid)
+
+    if (!sid) return
+
+    setIsHistoryLoading(true)
+    apiFetch<{ items: ChatMessageFromApi[] }>(`/api/chat/sessions/${sid}/messages`)
+      .then((data) => {
+        setMessages(
+          data.items.map((m) => ({
+            id: m.id,
+            role: m.role,
+            content: m.content,
+            carbonCost: m.role === 'assistant' ? m.carbon_gco2eq : undefined,
+          }))
+        )
+      })
+      .catch(() => setHistoryError(true))
+      .finally(() => setIsHistoryLoading(false))
   }, [sid])
 
   useEffect(() => {
@@ -188,7 +217,19 @@ function ChatContent() {
             </div>
           </header>
 
-          {!hasStarted ? (
+          {isHistoryLoading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="flex gap-2">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
+              </div>
+            </div>
+          ) : historyError ? (
+            <div className="flex-1 flex items-center justify-center p-8 text-center">
+              <p className="text-sm text-red-400">대화 내역을 불러올 수 없습니다. 잠시 후 다시 시도해주세요.</p>
+            </div>
+          ) : !hasStarted ? (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
               <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
                 <span className="text-4xl">🌱</span>
@@ -252,12 +293,12 @@ function ChatContent() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={hasStarted ? '메시지를 입력하세요.' : '오늘 어떤 도움을 드릴까요?'}
-                disabled={isTokenLoading || tokens.remaining <= 0 || isLoading}
+                disabled={isHistoryLoading || isTokenLoading || tokens.remaining <= 0 || isLoading}
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none disabled:bg-gray-100"
               />
               <button
                 type="submit"
-                disabled={isTokenLoading || !input.trim() || tokens.remaining <= 0 || isLoading}
+                disabled={isHistoryLoading || isTokenLoading || !input.trim() || tokens.remaining <= 0 || isLoading}
                 className="px-6 py-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
               >
                 전송
