@@ -5,12 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { apiFetch } from '@/lib/api'
-import { useApp } from '@/contexts/AppContext'
-import type { User } from '@/contexts/AppContext'
 import AuthHeader from '@/components/AuthHeader'
 import LoadingSpinner from '@/components/LoadingSpinner'
-
-type UserMe = User & { today_tokens?: { tokens_remaining: number } }
 
 interface SignupForm {
   email: string
@@ -22,7 +18,6 @@ const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}$/
 
 export default function SignupPage() {
   const router = useRouter()
-  const { setUser, updateRemainingTokens } = useApp()
   const [isLoading, setIsLoading] = useState(false)
   const [serverError, setServerError] = useState('')
 
@@ -43,11 +38,7 @@ export default function SignupPage() {
         method: 'POST',
         body: { email: data.email, password: data.password },
       })
-      const me = await apiFetch<UserMe>('/api/users/me')
-      const { today_tokens, ...userFields } = me
-      setUser({ ...userFields, onboarding_completed: false })
-      if (today_tokens) updateRemainingTokens(today_tokens.tokens_remaining)
-      router.push('/onboarding')
+      router.push('/login')
     } catch (err) {
       const status = (err as { status?: number }).status
       if (status === 400 || status === 409) {
