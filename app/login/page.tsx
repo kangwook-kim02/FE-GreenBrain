@@ -5,12 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { apiFetch } from '@/lib/api'
-import { useApp } from '@/contexts/AppContext'
-import type { User } from '@/contexts/AppContext'
 import AuthHeader from '@/components/AuthHeader'
 import LoadingSpinner from '@/components/LoadingSpinner'
-
-type UserMe = User & { today_tokens?: { tokens_remaining: number } }
 
 interface LoginForm {
   email: string
@@ -19,7 +15,6 @@ interface LoginForm {
 
 export default function LoginPage() {
   const router = useRouter()
-  const { setUser, updateRemainingTokens } = useApp()
   const [isLoading, setIsLoading] = useState(false)
   const [serverError, setServerError] = useState('')
 
@@ -37,10 +32,6 @@ export default function LoginPage() {
         method: 'POST',
         body: { email: data.email, password: data.password },
       })
-      const me = await apiFetch<UserMe>('/api/users/me')
-      const { today_tokens, ...userFields } = me
-      setUser({ ...userFields, onboarding_completed: true })
-      if (today_tokens) updateRemainingTokens(today_tokens.tokens_remaining)
       router.push('/chat')
     } catch (err) {
       const status = (err as { status?: number }).status
