@@ -1113,3 +1113,49 @@ Example
 | 400 | query parameter 형식 오류 |
 | 401 | 로그인하지 않은 사용자 |
 | 404 | 사진이 존재하지 않거나 삭제된 사진 |
+
+---
+## API update(260519)
+
+## 유저
+
+### 온보딩
+- 설명: 온보딩 생활습관 프로필을 저장한다.
+- 메서드: POST
+- URL: /api/users/onboarding
+
+### Request
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| transport_mode | 주요 이동 수단 | string |  | No | “car” |
+| diet_type | 식단 유형 | string |  | No | “omnivore” |
+| housing_type | 주거 유형 | string |  | No | “apartment” |
+
+**Query parameter**
+
+### Response
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| transport_mode | 주요 이동 수단 | string |  | No | “car” |
+| diet_type | 식단 유형 | string |  | No | “omnivore” |
+| housing_type | 주거 유형 | string |  | No | “apartment” |
+|  |  |  |  |  |  |
+
+**Example**
+
+```jsx
+{
+      "transport_mode": "car",
+      "diet_type": "omnivore",
+      "housing_type": "apartment"
+}
+```
+
+### Status
+
+| status | response content |
+| --- | --- |
+| 201 | 생성 또는 업데이트 |
+| 400 | 인증 필요 |

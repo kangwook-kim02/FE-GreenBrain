@@ -134,6 +134,16 @@ Body:    { transport_mode?: string; diet_type?: string; housing_type?: string }
 401:     인증되지 않은 사용자
 404:     생활습관 프로필 없음
 422:     요청 형식 오류
+
+POST /api/users/onboarding
+Body:    { transport_mode: TransportMode; diet_type: DietType; housing_type: HousingType }
+201:     { transport_mode: TransportMode; diet_type: DietType; housing_type: HousingType }
+400:     인증 필요
+→ 온보딩 완료 시 호출. 성공 후 AppContext user.onboarding_completed = true 갱신 + /chat 이동
+→ UI 선택값 → API 값 매핑 필요:
+   transport_mode: 'public'→'transit', 'car'→'car', 'bike'→'bike', 'walk'→'walk'
+   diet_type:      'vegan'→'vegan', 'vegetarian'→'vegetarian', 'balanced'→'flexitarian', 'meat'→'omnivore'
+   housing_type:   'apartment'→'apartment', 'house'→'house', 'studio'→'studio', 'shared'→'dorm'
 ```
 
 ---

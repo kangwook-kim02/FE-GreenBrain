@@ -1,4 +1,4 @@
-> 백엔드 API 명세. 확정 명세 기준(docs/GreenBrain-API.md, 2026-05-15). 상세 타입은 `.claude/skills/implement-feature/references/api-shapes.md` 참조.
+> 백엔드 API 명세. 확정 명세 기준(docs/GreenBrain-API.md, 2026-05-19). 상세 타입은 `.claude/skills/implement-feature/references/api-shapes.md` 참조.
 
 ## 인증
 
@@ -16,6 +16,7 @@
 | PATCH | `/api/users/me` | 기본 프로필 수정 | `{ nickname?, profile_image_url? }` | `{ id, email, nickname, profile_image_url, updated_at }` |
 | GET | `/api/users/profile` | 생활습관 프로필 조회 | 없음 | `UserProfile & { updated_at }` |
 | PATCH | `/api/users/profile` | 생활습관 프로필 수정 | `{ transport_mode?, diet_type?, housing_type? }` | `UserProfile & { updated_at }` |
+| POST | `/api/users/onboarding` | 온보딩 생활습관 저장 | `{ transport_mode, diet_type, housing_type }` | 201: `{ transport_mode, diet_type, housing_type }` |
 
 ## 채팅
 
@@ -34,21 +35,28 @@
 |--------|------|------|----------|----------|
 | GET | `/api/tokens/today` | 오늘 토큰 상태 | 없음 | `TokenToday` |
 
-## 챌린지 (API 명세 미확정)
+## 챌린지
 
 | Method | Path | 설명 | 요청 타입 | 응답 타입 |
 |--------|------|------|----------|----------|
-| GET | `/api/challenges/current` | 현재 챌린지 조회 | 없음 | `{ challenge, daily_count }` |
-| POST | `/api/challenges/{id}/accept` | 챌린지 수락 | 없음 | `{ challenge }` |
-| POST | `/api/challenges/{id}/verify` | 챌린지 인증 | `FormData { photo }` | `{ tokens_remaining }` |
+| GET | `/api/challenges/current` | 현재 챌린지 조회 | 없음 | `{ challenge: Challenge \| null }` |
+| POST | `/api/challenges/generate` | 챌린지 생성 | 없음 | 200/201: `{ challenge: Challenge; created: boolean }` |
+| POST | `/api/challenges/{id}/accept` | 챌린지 수락 | 없음 | `{ challenge: Challenge }` |
+| POST | `/api/challenges/{id}/photo` | 챌린지 인증 사진 업로드 | `FormData { file }` | `{ photo, challenge, reward }` |
 
-## 인증 피드 (API 명세 미확정)
+## 인증 피드
 
 | Method | Path | 설명 | 요청 타입 | 응답 타입 |
 |--------|------|------|----------|----------|
-| GET | `/api/feed` | 피드 목록 | `?page` | `{ items: FeedItem[], has_next }` |
-| POST | `/api/feed/{item_id}/like` | 좋아요 | 없음 | `{ likes, liked_by_me }` |
-| DELETE | `/api/feed/{item_id}` | 피드 삭제 | 없음 | 204 |
+| GET | `/api/challenges/feed` | 피드 목록 | `?limit&offset` | `{ items: FeedItem[], total, limit, offset }` |
+| DELETE | `/api/challenge-photos/{photo_id}` | 피드 삭제 | 없음 | `{ deleted, photo_id, deleted_at }` |
+
+## 좋아요
+
+| Method | Path | 설명 | 요청 타입 | 응답 타입 |
+|--------|------|------|----------|----------|
+| POST | `/api/challenge-photos/{photo_id}/like` | 좋아요 | 없음 | `{ liked, photo_id, like_count, reward_given, reward_amount, tokens_remaining }` |
+| GET | `/api/challenge-photos/{photo_id}/likes` | 좋아요 사용자 목록 | `?limit&offset` | `{ items, total, limit, offset }` |
 
 ## 공통 에러 처리
 
