@@ -2,8 +2,32 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { apiFetch } from '@/lib/api'
+import { useApp } from '@/contexts/AppContext'
 import OnboardingIcon from '@/components/icons/OnboardingIcons'
 import type { OnboardingIconName } from '@/components/icons/OnboardingIcons'
+import LoadingSpinner from '@/components/LoadingSpinner'
+
+const TRANSPORT_MAP: Record<string, string> = {
+  public: 'transit',
+  car: 'car',
+  bike: 'bike',
+  walk: 'walk',
+}
+
+const DIET_MAP: Record<string, string> = {
+  vegan: 'vegan',
+  vegetarian: 'vegetarian',
+  balanced: 'flexitarian',
+  meat: 'omnivore',
+}
+
+const HOUSING_MAP: Record<string, string> = {
+  apartment: 'apartment',
+  house: 'house',
+  studio: 'studio',
+  shared: 'other',
+}
 
 const STEPS = [
   {
@@ -40,22 +64,48 @@ const STEPS = [
 
 export default function OnboardingPage() {
   const router = useRouter()
+  const { user, setUser } = useApp()
   const [step, setStep] = useState(0)
   const [transportation, setTransportation] = useState('')
   const [diet, setDiet] = useState('')
   const [housing, setHousing] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
   const selectedValues = [transportation, diet, housing]
   const currentValue = selectedValues[step]
   const setter = [setTransportation, setDiet, setHousing][step]
   const canNext = currentValue !== ''
 
-  const handleNext = () => {
+  async function handleNext() {
     if (!canNext) return
     if (step < 2) {
       setStep(step + 1)
-    } else {
+      return
+    }
+
+    setIsSubmitting(true)
+    setError('')
+    try {
+      await apiFetch('/api/users/onboarding', {
+        method: 'POST',
+        body: {
+          transport_mode: TRANSPORT_MAP[transportation],
+          diet_type: DIET_MAP[diet],
+          housing_type: HOUSING_MAP[housing],
+        },
+      })
+
+      if (user) {
+        setUser({ ...user, onboarding_completed: true })
+        localStorage.setItem(`greenbrain_ob_${user.id}`, 'true')
+      }
+
       router.push('/chat')
+    } catch {
+      setError('저장에 실패했습니다. 다시 시도해주세요.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -120,6 +170,12 @@ export default function OnboardingPage() {
           </div>
         </div>
 
+        {error && (
+          <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Navigation */}
         <div className="flex gap-3 mt-8">
           {step > 0 && (
@@ -132,10 +188,11 @@ export default function OnboardingPage() {
           )}
           <button
             onClick={handleNext}
-            disabled={!canNext}
-            className="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors"
+            disabled={!canNext || isSubmitting}
+            className="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
-            {step === 2 ? '시작하기' : '다음'}
+            {isSubmitting && <LoadingSpinner />}
+            {isSubmitting ? '저장 중...' : step === 2 ? '시작하기' : '다음'}
           </button>
         </div>
       </div>

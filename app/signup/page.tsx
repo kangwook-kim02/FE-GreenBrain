@@ -45,12 +45,12 @@ export default function SignupPage() {
       })
       const me = await apiFetch<UserMe>('/api/users/me')
       const { today_tokens, ...userFields } = me
-      setUser(userFields)
+      setUser({ ...userFields, onboarding_completed: false })
       if (today_tokens) updateRemainingTokens(today_tokens.tokens_remaining)
       router.push('/onboarding')
     } catch (err) {
       const status = (err as { status?: number }).status
-      if (status === 400) {
+      if (status === 400 || status === 409) {
         setServerError('이미 사용 중인 이메일입니다')
       } else if (status === 422) {
         setServerError('입력 형식을 확인해주세요')

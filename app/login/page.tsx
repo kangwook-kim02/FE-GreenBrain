@@ -38,9 +38,8 @@ export default function LoginPage() {
         body: { email: data.email, password: data.password },
       })
       const me = await apiFetch<UserMe>('/api/users/me')
-      // console.log('[login] /api/users/me →', me)
       const { today_tokens, ...userFields } = me
-      setUser(userFields)
+      setUser({ ...userFields, onboarding_completed: true })
       if (today_tokens) updateRemainingTokens(today_tokens.tokens_remaining)
       router.push('/chat')
     } catch (err) {

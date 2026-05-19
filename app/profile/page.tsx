@@ -151,7 +151,7 @@ export default function ProfilePage() {
           email: data.email,
           nickname: data.nickname,
           profile_image_url: data.profile_image_url,
-          onboarding_completed: data.onboarding_completed,
+          onboarding_completed: data.onboarding_completed ?? true,
           profile: data.profile
             ? {
                 transport_mode: data.profile.transport_mode as 'car' | 'transit' | 'walk' | 'bike' | 'mixed',

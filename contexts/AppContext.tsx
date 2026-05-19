@@ -60,7 +60,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const data = await apiFetch<UserMeResponse>('/api/users/me')
         if (cancelled) return
         const { today_tokens, ...userFields } = data
-        setUser(userFields)
+        const onboardingCompleted = data.onboarding_completed
+          ?? (data.id ? localStorage.getItem(`greenbrain_ob_${data.id}`) !== 'false' : true)
+        setUser({ ...userFields, onboarding_completed: onboardingCompleted })
         if (today_tokens) {
           setTokens((prev) => ({ ...prev, remaining: today_tokens.tokens_remaining }))
         }
