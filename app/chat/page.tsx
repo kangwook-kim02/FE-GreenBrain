@@ -188,7 +188,6 @@ function ChatContent() {
         `/api/chat/sessions/${sessionId}/messages`,
         { method: 'POST', body: { message: text, model_id: selectedModel } }
       )
-      console.log(data);
       updateRemainingTokens(data.tokens_remaining)
 
       setMessages((prev) => [
@@ -357,19 +356,19 @@ function ChatContent() {
 
           <div className="bg-white border-t border-gray-200 p-4 shrink-0">
             <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
-              <div className="flex gap-3 mb-2">
+              <div className="flex gap-2 mb-2">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder={hasStarted ? '메시지를 입력하세요.' : '오늘 어떤 도움을 드릴까요?'}
                   disabled={isHistoryLoading || isTokenLoading || tokens.remaining <= 0 || isLoading}
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none disabled:bg-gray-100"
+                  className="flex-1 min-w-0 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none disabled:bg-gray-100"
                 />
                 <button
                   type="submit"
                   disabled={isHistoryLoading || isTokenLoading || !input.trim() || tokens.remaining <= 0 || isLoading}
-                  className="px-6 py-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
+                  className="flex-shrink-0 px-4 sm:px-6 py-2.5 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
                 >
                   전송
                 </button>
