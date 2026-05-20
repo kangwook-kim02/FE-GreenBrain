@@ -82,6 +82,7 @@ export default function ChatSidebar({ open, onClose }: Props) {
 
   function handleNewChat() {
     router.push('/chat')
+    if (window.innerWidth < 640) onClose()
   }
 
   // currentSid가 바뀔 때(새 세션 생성·세션 전환) 목록을 재조회한다
@@ -166,8 +167,10 @@ export default function ChatSidebar({ open, onClose }: Props) {
 
   return (
     <aside
-      className={`hidden sm:flex flex-col shrink-0 bg-gray-900 text-white overflow-hidden transition-all duration-200 ease-in-out ${
-        open ? 'w-64' : 'w-0'
+      className={`flex-col shrink-0 bg-gray-900 text-white overflow-hidden transition-all duration-200 ease-in-out ${
+        open
+          ? 'flex fixed inset-y-0 left-0 z-50 w-full sm:relative sm:inset-auto sm:z-auto sm:w-64'
+          : 'hidden sm:flex sm:w-0'
       }`}
     >
       {contextMenu && (
@@ -195,7 +198,7 @@ export default function ChatSidebar({ open, onClose }: Props) {
         </div>
       )}
 
-      <div className="w-64 flex flex-col h-full">
+      <div className="w-full sm:w-64 flex flex-col h-full">
         <div className="flex items-center justify-between px-4 py-4 border-b border-gray-700">
           <div className="flex items-center gap-2">
             <span className="text-lg">🌱</span>
@@ -295,7 +298,10 @@ export default function ChatSidebar({ open, onClose }: Props) {
                     ) : (
                       <>
                         <button
-                          onClick={() => router.push(`/chat?sid=${session.id}`)}
+                          onClick={() => {
+                            router.push(`/chat?sid=${session.id}`)
+                            if (window.innerWidth < 640) onClose()
+                          }}
                           className="flex-1 min-w-0 text-left px-3 py-2 text-sm text-gray-300 group-hover:text-white truncate"
                           title={session.title ?? '새 채팅'}
                         >

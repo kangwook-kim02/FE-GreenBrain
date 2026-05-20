@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import TokenBar from '@/components/TokenBar'
 import CarbonCard from '@/components/CarbonCard'
 import SidebarLayout from '@/components/SidebarLayout'
-import NavMenu from '@/components/NavMenu'
 import ChallengeModal from '@/components/ChallengeModal'
 import { useApp } from '@/contexts/AppContext'
 import { apiFetch } from '@/lib/api'
@@ -434,7 +433,6 @@ function ChatContent() {
               </div>
             </form>
           </div>
-          <NavMenu hiddenOnDesktop />
           <ChallengeModal
             open={challengeModalOpen}
             onClose={() => setChallengeModalOpen(false)}

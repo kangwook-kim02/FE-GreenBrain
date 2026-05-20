@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import SidebarLayout from '@/components/SidebarLayout'
-import NavMenu from '@/components/NavMenu'
 import SkeletonCard from '@/components/SkeletonCard'
 import EmptyState from '@/components/EmptyState'
 import { useApp } from '@/contexts/AppContext'
@@ -242,7 +241,6 @@ export default function ChallengeFeedPage() {
             <div className="max-w-4xl mx-auto p-4 flex items-center gap-3">
               {toggleButton}
               <h1 className="text-2xl font-bold text-gray-900 flex-1">챌린지 인증 피드</h1>
-              <NavMenu hiddenOnDesktop />
             </div>
           </header>
 
