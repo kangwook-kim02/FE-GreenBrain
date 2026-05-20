@@ -7,12 +7,12 @@ export default function MarkdownContent({ content }: { content: string }) {
         p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
         strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
         em: ({ children }) => <em className="italic">{children}</em>,
-        ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-0.5">{children}</ul>,
-        ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-0.5">{children}</ol>,
+        ul: ({ children }) => <ul className="list-disc list-inside mb-3 space-y-1.5">{children}</ul>,
+        ol: ({ children }) => <ol className="list-decimal list-inside mb-3 space-y-1.5">{children}</ol>,
         li: ({ children }) => <li>{children}</li>,
-        h1: ({ children }) => <h1 className="text-lg font-bold mb-2">{children}</h1>,
-        h2: ({ children }) => <h2 className="text-base font-bold mb-1.5">{children}</h2>,
-        h3: ({ children }) => <h3 className="text-sm font-semibold mb-1">{children}</h3>,
+        h1: ({ children }) => <h1 className="text-2xl font-bold mb-3 mt-4">{children}</h1>,
+        h2: ({ children }) => <h2 className="text-xl font-bold mb-2 mt-3">{children}</h2>,
+        h3: ({ children }) => <h3 className="text-lg font-semibold mb-2 mt-2">{children}</h3>,
         blockquote: ({ children }) => (
           <blockquote className="border-l-4 border-gray-300 pl-3 text-gray-600 my-2 italic">
             {children}

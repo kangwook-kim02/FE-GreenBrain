@@ -188,6 +188,7 @@ function ChatContent() {
         `/api/chat/sessions/${sessionId}/messages`,
         { method: 'POST', body: { message: text, model_id: selectedModel } }
       )
+      console.log(data);
       updateRemainingTokens(data.tokens_remaining)
 
       setMessages((prev) => [
@@ -314,21 +315,17 @@ function ChatContent() {
               <div className="max-w-4xl mx-auto space-y-4">
                 {messages.map((message) => (
                   <div key={message.id}>
-                    <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div
-                        className={`max-w-[70%] rounded-2xl p-4 ${
-                          message.role === 'user'
-                            ? 'bg-green-500 text-white'
-                            : 'bg-white border border-gray-200'
-                        }`}
-                      >
-                        {message.role === 'user' ? (
+                    {message.role === 'user' ? (
+                      <div className="flex justify-end">
+                        <div className="max-w-[70%] rounded-2xl p-4 bg-green-500 text-white">
                           <p className="whitespace-pre-wrap">{message.content}</p>
-                        ) : (
-                          <MarkdownContent content={message.content} />
-                        )}
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="py-2 max-w-3xl">
+                        <MarkdownContent content={message.content} />
+                      </div>
+                    )}
 
                     {message.carbonCost !== undefined && (
                       <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mt-2`}>
@@ -344,13 +341,11 @@ function ChatContent() {
                 ))}
 
                 {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-white border border-gray-200 rounded-2xl p-4">
-                      <div className="flex gap-2">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
-                      </div>
+                  <div className="py-2">
+                    <div className="flex gap-2">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
                     </div>
                   </div>
                 )}
