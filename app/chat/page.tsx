@@ -17,34 +17,28 @@ interface Model {
   provider: string
 }
 
-const MODELS: Model[] = [
-  { label: 'GPT-5.5',               value: 'openai/gpt-5.5',                  provider: 'OpenAI' },
-  { label: 'GPT-5.5-Pro',           value: 'openai/gpt-5.5-pro',              provider: 'OpenAI' },
-  { label: 'GPT-5.4',               value: 'openai/gpt-5.4',                  provider: 'OpenAI' },
-  { label: 'GPT-5.4-Pro',           value: 'openai/gpt-5.4-pro',              provider: 'OpenAI' },
-  { label: 'GPT-5.4-Mini',          value: 'openai/gpt-5.4-mini',             provider: 'OpenAI' },
-  { label: 'GPT-5.4-Nano',          value: 'openai/gpt-5.4-nano',             provider: 'OpenAI' },
-  { label: 'GPT-5-Mini',            value: 'openai/gpt-5-mini',               provider: 'OpenAI' },
-  { label: 'GPT-5-Nano',            value: 'openai/gpt-5-nano',               provider: 'OpenAI' },
-  { label: 'GPT-5',                 value: 'openai/gpt-5',                    provider: 'OpenAI' },
-  { label: 'GPT-4.1',               value: 'openai/gpt-4.1',                  provider: 'OpenAI' },
-  { label: 'Gemini-3.1-Pro',        value: 'google/gemini-3.1-pro',           provider: 'Google' },
-  { label: 'Gemini-3-Flash-Preview', value: 'google/gemini-3-flash-preview',  provider: 'Google' },
-  { label: 'Gemini-2.5-Pro',        value: 'google/gemini-2.5-pro',           provider: 'Google' },
-  { label: 'Gemini-2.5-Flash',      value: 'google/gemini-2.5-flash',         provider: 'Google' },
-  { label: 'Gemini-2.5-Flash-Lite', value: 'google/gemini-2.5-flash-lite',    provider: 'Google' },
-  // { label: 'gemma-3-27b',           value: 'google/gemma-3-27b',              provider: 'Google' },
-  { label: 'Claude-Opus-4-7',       value: 'anthropic/claude-opus-4-7',       provider: 'Anthropic' },
-  { label: 'Claude-Opus-4-6',       value: 'anthropic/claude-opus-4-6',       provider: 'Anthropic' },
-  { label: 'Claude-Sonnet-4-6',     value: 'anthropic/claude-sonnet-4-6',     provider: 'Anthropic' },
-  { label: 'Claude-Sonnet-4-5',     value: 'anthropic/claude-sonnet-4-5',     provider: 'Anthropic' },
-  { label: 'Claude-3.7-Sonnet',     value: 'anthropic/claude-3.7-sonnet',     provider: 'Anthropic' },
-  { label: 'Claude-Haiku-4-5',      value: 'anthropic/claude-haiku-4-5',      provider: 'Anthropic' },
-  { label: 'Claude-3.5-Haiku',      value: 'anthropic/claude-3.5-haiku',      provider: 'Anthropic' },
-]
+const PROVIDER_MAP: Record<string, string> = {
+  openai: 'OpenAI',
+  anthropic: 'Anthropic',
+  gemini: 'Google',
+  deepseek: 'DeepSeek',
+  upstage: 'Upstage',
+}
 
-const MODEL_PROVIDERS = ['OpenAI', 'Anthropic',  'Google'] as const
-const DEFAULT_MODEL = 'openai/gpt-5.5'
+function parseModel(value: string): Model {
+  const slashIdx = value.indexOf('/')
+  const providerKey = value.slice(0, slashIdx)
+  const modelId = value.slice(slashIdx + 1).replace(/-\d{4}-\d{2}-\d{2}$/, '')
+  const label = modelId
+    .split('-')
+    .map((seg) => {
+      if (seg === 'gpt') return 'GPT'
+      if (/^\d/.test(seg)) return seg
+      return seg.charAt(0).toUpperCase() + seg.slice(1)
+    })
+    .join('-')
+  return { label, value, provider: PROVIDER_MAP[providerKey] ?? providerKey }
+}
 
 interface Message {
   id: string
@@ -91,7 +85,10 @@ function ChatContent() {
   const [isHistoryLoading, setIsHistoryLoading] = useState(false)
   const [historyError, setHistoryError] = useState(false)
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(sid)
-  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
+  const [models, setModels] = useState<Model[]>([])
+  const [isModelsLoading, setIsModelsLoading] = useState(true)
+  const [modelsError, setModelsError] = useState('')
+  const [selectedModel, setSelectedModel] = useState('')
   const [modelDropdownOpen, setModelDropdownOpen] = useState(false)
   const [challengeModalOpen, setChallengeModalOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -129,6 +126,17 @@ function ChatContent() {
       .catch(() => setHistoryError(true))
       .finally(() => setIsHistoryLoading(false))
   }, [sid])
+
+  useEffect(() => {
+    apiFetch<{ items: string[] }>('/api/chat/models')
+      .then((data) => {
+        const parsed = data.items.filter((v) => v !== 'runyour/free').map(parseModel);
+        setModels(parsed)
+        if (parsed.length > 0) setSelectedModel(parsed[0].value)
+      })
+      .catch(() => setModelsError('모델 목록을 불러올 수 없습니다.'))
+      .finally(() => setIsModelsLoading(false))
+  }, [])
 
   useEffect(() => {
     apiFetch<{ tokens_remaining: number }>('/api/tokens/today')
@@ -176,12 +184,10 @@ function ChatContent() {
         justCreatedSessionRef.current = true
         router.replace(`/chat?sid=${sessionId}`)
       }
-
       const data = await apiFetch<ChatMessageResponse>(
         `/api/chat/sessions/${sessionId}/messages`,
         { method: 'POST', body: { message: text, model_id: selectedModel } }
       )
-
       updateRemainingTokens(data.tokens_remaining)
 
       setMessages((prev) => [
@@ -378,10 +384,13 @@ function ChatContent() {
                 <button
                   type="button"
                   onClick={() => setModelDropdownOpen((v) => !v)}
-                  className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
+                  disabled={isModelsLoading}
+                  className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="font-medium">
-                    {MODELS.find((m) => m.value === selectedModel)?.label}
+                    {isModelsLoading
+                      ? '모델 로딩 중...'
+                      : (models.find((m) => m.value === selectedModel)?.label ?? selectedModel)}
                   </span>
                   <svg
                     className={`w-3.5 h-3.5 transition-transform duration-150 ${modelDropdownOpen ? 'rotate-180' : ''}`}
@@ -391,14 +400,18 @@ function ChatContent() {
                   </svg>
                 </button>
 
-                {modelDropdownOpen && (
+                {modelsError && (
+                  <p className="mt-1 text-xs text-red-500">{modelsError}</p>
+                )}
+
+                {modelDropdownOpen && models.length > 0 && (
                   <div className="absolute bottom-full left-0 mb-1 w-60 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50 max-h-72 overflow-y-auto">
-                    {MODEL_PROVIDERS.map((provider) => (
+                    {[...new Set(models.map((m) => m.provider))].map((provider) => (
                       <div key={provider}>
                         <p className="px-3 pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                           {provider}
                         </p>
-                        {MODELS.filter((m) => m.provider === provider).map((model) => (
+                        {models.filter((m) => m.provider === provider).map((model) => (
                           <button
                             key={model.value}
                             type="button"
