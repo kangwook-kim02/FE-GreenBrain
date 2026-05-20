@@ -1160,3 +1160,74 @@ Example
 | --- | --- |
 | 201 | 생성 또는 업데이트 |
 | 400 | 인증 필요 |
+
+
+## 20260520 update
+
+## 채팅
+
+### 모델 조회
+- 설명: 선택 가능한 모델을 배열(리스트) 형태로 전달 받는다.
+- 메서드: GET
+- URL: /api/chat/models
+### Request
+
+없음
+
+**Query parameter**
+
+없음
+
+### Response
+
+| key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
+| --- | --- | --- | --- | --- | --- |
+| items | runyourai가 제공하는 모델 리스트 | array of string |  | false  | ["openai/gpt-4.1-2025-04-14"] |
+
+**Example**
+
+```jsx
+{
+  "items": [
+    "runyour/free",
+    "openai/gpt-5.5-2026-04-23",
+    "openai/gpt-5.5-pro-2026-04-23",
+    "openai/gpt-5.4-2026-03-05",
+    "openai/gpt-5.4-pro-2026-03-05",
+    "openai/gpt-5.4-mini-2026-03-17",
+    "openai/gpt-5.4-nano-2026-03-17",
+    "openai/gpt-5.3-codex",
+    "openai/gpt-5.2",
+    "openai/gpt-5.1",
+    "openai/gpt-5",
+    "openai/gpt-5-mini-2025-08-07",
+    "openai/gpt-5-nano-2025-08-07",
+    "openai/gpt-4.1-2025-04-14",
+    "openai/gpt-image-1.5",
+    "anthropic/claude-opus-4-7",
+    "anthropic/claude-opus-4-6",
+    "anthropic/claude-opus-4-5",
+    "anthropic/claude-sonnet-4-6",
+    "anthropic/claude-sonnet-4-5",
+    "anthropic/claude-haiku-4-5",
+    "gemini/gemini-3.1-pro-preview",
+    "gemini/gemini-3-flash-preview",
+    "gemini/gemini-2.5-pro",
+    "gemini/gemini-2.5-flash",
+    "gemini/gemini-2.5-flash-lite",
+    "gemini/gemini-3-pro-image-preview",
+    "gemini/gemini-3.1-flash-image-preview",
+    "deepseek/deepseek-chat",
+    "upstage/solar-pro3",
+    "upstage/solar-pro2"
+  ]
+}
+```
+
+### Status
+
+| status | response content |
+| --- | --- |
+| 200 | 조회 성공 |
+| 400 | 인증 필요 |
+| 502  | RunyourAI 프로파이더 오류 |

@@ -28,6 +28,7 @@
 | DELETE | `/api/chat/sessions/{id}` | 세션 삭제 | 없음 | 204 |
 | POST | `/api/chat/sessions/{id}/messages` | 메시지 전송 | `{ message, model_id? }` | `{ response, carbon_gco2eq, tokens_remaining, exhausted, ... }` |
 | GET | `/api/chat/sessions/{id}/messages` | 메시지 목록 | `?limit&cursor` | `{ items: ChatMessage[], next_cursor }` |
+| GET | `/api/chat/models` | 모델 목록 조회 | 없음 | `{ items: string[] }` |
 
 ## 토큰
 

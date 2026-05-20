@@ -175,7 +175,7 @@ DELETE /api/chat/sessions/{session_id}
 404:     Chat session not found
 
 POST /api/chat/sessions/{session_id}/messages
-Body:    { message: string; model_id?: string }  // model_id: 'provider/model-name' 형식, 기본값 'openai/gpt-5.5'
+Body:    { message: string; model_id?: string }  // model_id: GET /api/chat/models 응답 items[]의 값을 그대로 전송, 변환 금지
 200:     {
            message_id: string
            response_message_id: string
@@ -195,6 +195,14 @@ Query:   { limit?: number; cursor?: string }
 200:     { items: ChatMessage[]; next_cursor: string | null }
 401:     Authentication required
 404:     Chat session not found
+
+GET /api/chat/models
+응답:    { items: string[] }  // 'provider/model-id' 형식 ex) "openai/gpt-5.5-2026-04-23"
+200:     조회 성공
+400:     인증 필요
+502:     RunyourAI 프로바이더 오류
+→ useModels hook에서 사용, SWR 캐싱 적용 (#72)
+→ items의 값을 selectedModel state에 그대로 저장 → POST /messages의 model_id로 변환 없이 전송
 ```
 
 ---
