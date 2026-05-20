@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react'
 import SidebarLayout from '@/components/SidebarLayout'
-import NavMenu from '@/components/NavMenu'
 import OnboardingIcon from '@/components/icons/OnboardingIcons'
 import type { OnboardingIconName } from '@/components/icons/OnboardingIcons'
 import { useApp } from '@/contexts/AppContext'
@@ -321,7 +320,6 @@ export default function ProfilePage() {
             <div className="max-w-2xl mx-auto p-4 flex items-center gap-3">
               {toggleButton}
               <h1 className="text-2xl font-bold text-gray-900 flex-1">내 프로필</h1>
-              <NavMenu hiddenOnDesktop />
             </div>
           </header>
 
