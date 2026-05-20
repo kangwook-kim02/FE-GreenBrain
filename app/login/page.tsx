@@ -26,11 +26,11 @@ export default function LoginPage() {
     setServerError('')
     setIsLoading(true)
     try {
-      await apiFetch('/api/auth/login', {
+      const res = await apiFetch<{ message: string; onboarding_completed: boolean }>('/api/auth/login', {
         method: 'POST',
         body: { email: data.email, password: data.password },
       })
-      window.location.href = '/chat'
+      window.location.href = res.onboarding_completed ? '/chat' : '/onboarding'
     } catch (err) {
       const status = (err as { status?: number }).status
       if (status === 401) {
