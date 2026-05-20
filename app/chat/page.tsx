@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, useState, useRef, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import TokenBar from '@/components/TokenBar'
 import CarbonCard from '@/components/CarbonCard'
 import SidebarLayout from '@/components/SidebarLayout'
@@ -80,6 +80,7 @@ function getCarbonAnalogy(carbonCost: number): { icon: string; text: string } {
 }
 
 function ChatContent() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const sid = searchParams.get('sid')
   const { user, tokens, updateRemainingTokens } = useApp()
@@ -95,11 +96,17 @@ function ChatContent() {
   const [challengeModalOpen, setChallengeModalOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const modelDropdownRef = useRef<HTMLDivElement>(null)
+  const justCreatedSessionRef = useRef(false)
 
   const hasStarted = messages.length > 0
   const username = user?.nickname ?? '환경지킴이'
 
   useEffect(() => {
+    if (justCreatedSessionRef.current) {
+      justCreatedSessionRef.current = false
+      return
+    }
+
     setMessages([])
     setInput('')
     setHistoryError(false)
@@ -166,6 +173,8 @@ function ChatContent() {
         const session = await apiFetch<{ id: string }>('/api/chat/sessions', { method: 'POST' })
         sessionId = session.id
         setCurrentSessionId(sessionId)
+        justCreatedSessionRef.current = true
+        router.replace(`/chat?sid=${sessionId}`)
       }
 
       const data = await apiFetch<ChatMessageResponse>(

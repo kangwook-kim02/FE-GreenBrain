@@ -71,8 +71,6 @@ export default function ChatSidebar({ open, onClose }: Props) {
   const searchParams = useSearchParams()
   const currentSid = searchParams.get('sid')
 
-  const [isCreating, setIsCreating] = useState(false)
-  const [createError, setCreateError] = useState('')
   const [sessions, setSessions] = useState<ChatSession[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [sessionsError, setSessionsError] = useState('')
@@ -82,17 +80,8 @@ export default function ChatSidebar({ open, onClose }: Props) {
   const editInputRef = useRef<HTMLInputElement>(null)
   const sessionsListRef = useRef<HTMLDivElement>(null)
 
-  async function handleNewChat() {
-    setCreateError('')
-    setIsCreating(true)
-    try {
-      const session = await apiFetch<{ id: string; title: string | null }>('/api/chat/sessions', { method: 'POST' })
-      router.push(`/chat?sid=${session.id}`)
-    } catch {
-      setCreateError('새 채팅을 시작할 수 없습니다.')
-    } finally {
-      setIsCreating(false)
-    }
+  function handleNewChat() {
+    router.push('/chat')
   }
 
   // currentSid가 바뀔 때(새 세션 생성·세션 전환) 목록을 재조회한다
@@ -226,17 +215,13 @@ export default function ChatSidebar({ open, onClose }: Props) {
         <div className="p-3 space-y-1 border-b border-gray-700">
           <button
             onClick={() => handleNewChat()}
-            disabled={isCreating}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm text-gray-300 hover:text-white hover:bg-gray-700 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm text-gray-300 hover:text-white hover:bg-gray-700"
           >
             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            {isCreating ? '생성 중...' : '새 채팅'}
+            새 채팅
           </button>
-          {createError && (
-            <p className="px-3 mt-1 text-xs text-red-400">{createError}</p>
-          )}
 
           {NAV_LINKS.map((item) => {
             const active = pathname === item.href
