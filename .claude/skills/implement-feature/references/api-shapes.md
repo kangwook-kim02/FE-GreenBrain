@@ -175,7 +175,7 @@ DELETE /api/chat/sessions/{session_id}
 404:     Chat session not found
 
 POST /api/chat/sessions/{session_id}/messages
-Body:    { message: string }
+Body:    { message: string; model_id?: string }  // model_id: 'provider/model-name' 형식, 기본값 'openai/gpt-5.5'
 200:     {
            message_id: string
            response_message_id: string

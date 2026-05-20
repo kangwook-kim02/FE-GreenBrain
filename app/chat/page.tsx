@@ -170,7 +170,7 @@ function ChatContent() {
 
       const data = await apiFetch<ChatMessageResponse>(
         `/api/chat/sessions/${sessionId}/messages`,
-        { method: 'POST', body: { message: text } }
+        { method: 'POST', body: { message: text, model_id: selectedModel } }
       )
 
       updateRemainingTokens(data.tokens_remaining)

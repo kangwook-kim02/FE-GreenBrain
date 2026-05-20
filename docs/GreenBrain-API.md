@@ -332,6 +332,7 @@ Example
 | key | 설명 | value 타입 | 옵션 | Nullable | 예시 |
 | --- | --- | --- | --- | --- | --- |
 | message | 전송할 메시지 (공백 불가) | string | - | false | 오늘 탄소 절약 방법 알려줘 |
+| model_id | 사용할 AI 모델 ID | string | `provider/model-name` 형식, optional, 기본값 `openai/gpt-5.5` | true | `"openai/gpt-5.5"` |
 
 ### Response
 
