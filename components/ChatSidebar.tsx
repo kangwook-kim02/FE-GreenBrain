@@ -22,7 +22,7 @@ const NAV_LINKS = [
     href: '/challenges/feed',
     label: '챌린지 피드',
     icon: (
-      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
       </svg>
     ),
@@ -31,7 +31,7 @@ const NAV_LINKS = [
     href: '/profile',
     label: '프로필',
     icon: (
-      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
           d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
       </svg>
@@ -166,7 +166,7 @@ export default function ChatSidebar({ open, onClose }: Props) {
 
   return (
     <aside
-      className={`hidden sm:flex flex-col flex-shrink-0 bg-gray-900 text-white overflow-hidden transition-all duration-200 ease-in-out ${
+      className={`hidden sm:flex flex-col shrink-0 bg-gray-900 text-white overflow-hidden transition-all duration-200 ease-in-out ${
         open ? 'w-64' : 'w-0'
       }`}
     >
@@ -217,7 +217,7 @@ export default function ChatSidebar({ open, onClose }: Props) {
             onClick={() => handleNewChat()}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm text-gray-300 hover:text-white hover:bg-gray-700"
           >
-            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             새 채팅
@@ -303,7 +303,7 @@ export default function ChatSidebar({ open, onClose }: Props) {
                         </button>
                         <button
                           onClick={(e) => handleDelete(e, session.id)}
-                          className="hidden group-hover:flex items-center justify-center w-8 h-8 text-gray-400 hover:text-red-400 transition-colors flex-shrink-0"
+                          className="hidden group-hover:flex items-center justify-center w-8 h-8 text-gray-400 hover:text-red-400 transition-colors shrink-0"
                           aria-label="세션 삭제"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

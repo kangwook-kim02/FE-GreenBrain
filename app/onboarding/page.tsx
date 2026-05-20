@@ -18,15 +18,15 @@ const TRANSPORT_MAP: Record<string, string> = {
 const DIET_MAP: Record<string, string> = {
   vegan: 'vegan',
   vegetarian: 'vegetarian',
-  balanced: 'flexitarian',
-  meat: 'omnivore',
+  balanced: 'omnivore',
+  meat: 'flexitarian',
 }
 
 const HOUSING_MAP: Record<string, string> = {
   apartment: 'apartment',
   house: 'house',
   studio: 'studio',
-  shared: 'other',
+  shared: 'dorm',
 }
 
 const STEPS = [
@@ -116,7 +116,7 @@ export default function OnboardingPage() {
   const currentStep = STEPS[step]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-2xl">
         {/* Header + Progress */}
         <div className="mb-8">
@@ -156,10 +156,10 @@ export default function OnboardingPage() {
                     : 'border-gray-200 hover:border-green-300 hover:bg-gray-50'
                 }`}
               >
-                <span className="text-gray-700 flex-shrink-0"><OnboardingIcon name={option.icon} /></span>
+                <span className="text-gray-700 shrink-0"><OnboardingIcon name={option.icon} /></span>
                 <span className="font-medium text-gray-900 flex-1">{option.label}</span>
                 {currentValue === option.value && (
-                  <span className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                  <span className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center shrink-0">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                     </svg>

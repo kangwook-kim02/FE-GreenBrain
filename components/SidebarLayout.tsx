@@ -22,7 +22,7 @@ export default function SidebarLayout({ children }: Props) {
     <button
       onClick={() => setSidebarOpen(true)}
       aria-expanded={false}
-      className="hidden sm:flex flex-col justify-center gap-1.5 w-9 h-9 items-center flex-shrink-0 rounded-lg hover:bg-gray-100 transition-colors"
+      className="hidden sm:flex flex-col justify-center gap-1.5 w-9 h-9 items-center shrink-0 rounded-lg hover:bg-gray-100 transition-colors"
       aria-label="사이드바 열기"
     >
       <span className="block w-5 h-0.5 bg-gray-700" />
