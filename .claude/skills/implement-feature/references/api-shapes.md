@@ -95,11 +95,11 @@ Body:    { email: string; password: string }
 
 POST /api/auth/login
 Body:    { email: string; password: string }
-200:     { message: "Login successful" }  +  HttpOnly 쿠키 access_token 발급
+200:     { message: "Login successful"; onboarding_completed: boolean }  +  HttpOnly 쿠키 access_token 발급
 401:     이메일 또는 비밀번호 오류
 429:     로그인 5회 초과 실패 (일시 잠금)
 422:     요청 형식 오류
-→ 성공 시 /chat 이동
+→ 성공 시 onboarding_completed: true → /chat, false → /onboarding 이동
 
 POST /api/auth/logout
 Body:    없음
