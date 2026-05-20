@@ -188,6 +188,7 @@ function ChatContent() {
         `/api/chat/sessions/${sessionId}/messages`,
         { method: 'POST', body: { message: text, model_id: selectedModel } }
       )
+      console.log(data);
       updateRemainingTokens(data.tokens_remaining)
 
       setMessages((prev) => [
@@ -321,7 +322,7 @@ function ChatContent() {
                         </div>
                       </div>
                     ) : (
-                      <div className="py-2">
+                      <div className="py-2 max-w-3xl">
                         <MarkdownContent content={message.content} />
                       </div>
                     )}
