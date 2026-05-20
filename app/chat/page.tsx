@@ -28,7 +28,7 @@ const PROVIDER_MAP: Record<string, string> = {
 function parseModel(value: string): Model {
   const slashIdx = value.indexOf('/')
   const providerKey = value.slice(0, slashIdx)
-  const modelId = value.slice(slashIdx + 1)
+  const modelId = value.slice(slashIdx + 1).replace(/-\d{4}-\d{2}-\d{2}$/, '')
   const label = modelId
     .split('-')
     .map((seg) => {
@@ -130,7 +130,7 @@ function ChatContent() {
   useEffect(() => {
     apiFetch<{ items: string[] }>('/api/chat/models')
       .then((data) => {
-        const parsed = data.items.map(parseModel)
+        const parsed = data.items.filter((v) => v !== 'runyour/free').map(parseModel);
         setModels(parsed)
         if (parsed.length > 0) setSelectedModel(parsed[0].value)
       })
@@ -184,12 +184,10 @@ function ChatContent() {
         justCreatedSessionRef.current = true
         router.replace(`/chat?sid=${sessionId}`)
       }
-
       const data = await apiFetch<ChatMessageResponse>(
         `/api/chat/sessions/${sessionId}/messages`,
         { method: 'POST', body: { message: text, model_id: selectedModel } }
       )
-
       updateRemainingTokens(data.tokens_remaining)
 
       setMessages((prev) => [
