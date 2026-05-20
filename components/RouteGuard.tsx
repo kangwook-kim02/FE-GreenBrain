@@ -20,6 +20,8 @@ export default function RouteGuard({ children }: { children: React.ReactNode }) 
 
     if (!user && !isPublic) {
       router.replace('/login')
+    } else if (user && isPublic) {
+      router.replace('/chat')
     } else if (user && !user.onboarding_completed && !isOnboarding) {
       router.replace('/onboarding')
     }

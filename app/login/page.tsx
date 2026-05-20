@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { apiFetch } from '@/lib/api'
 import AuthHeader from '@/components/AuthHeader'
@@ -14,7 +13,6 @@ interface LoginForm {
 }
 
 export default function LoginPage() {
-  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [serverError, setServerError] = useState('')
 
@@ -32,7 +30,7 @@ export default function LoginPage() {
         method: 'POST',
         body: { email: data.email, password: data.password },
       })
-      router.push('/chat')
+      window.location.href = '/chat'
     } catch (err) {
       const status = (err as { status?: number }).status
       if (status === 401) {
