@@ -387,7 +387,7 @@ export default function ProfilePage() {
                           <button
                             onClick={handleSaveName}
                             disabled={isSavingName || !nameInput.trim()}
-                            className="shrink-0 px-3 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors"
+                            className="shrink-0 whitespace-nowrap px-3 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors"
                           >
                             저장
                           </button>
