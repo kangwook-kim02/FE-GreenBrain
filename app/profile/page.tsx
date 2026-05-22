@@ -263,7 +263,6 @@ export default function ProfilePage() {
     setAvatarError('')
     const formData = new FormData()
     formData.append('avatar', fileInputRef.current.files[0])
-
     try {
       const data = await apiFetch<{ profile_image_url: string }>('/api/users/me', {
         method: 'PATCH',
@@ -381,14 +380,14 @@ export default function ProfilePage() {
                             value={nameInput}
                             onChange={(e) => setNameInput(e.target.value)}
                             onKeyDown={handleNameKeyDown}
-                            className="flex-1 px-3 py-2 border-2 border-green-400 rounded-lg text-gray-900 font-semibold focus:outline-none focus:border-green-500 text-lg"
+                            className="flex-1 min-w-0 px-3 py-2 border-2 border-green-400 rounded-lg text-gray-900 font-semibold focus:outline-none focus:border-green-500 text-lg"
                             autoFocus
                             disabled={isSavingName}
                           />
                           <button
                             onClick={handleSaveName}
                             disabled={isSavingName || !nameInput.trim()}
-                            className="px-3 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors"
+                            className="shrink-0 px-3 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors"
                           >
                             저장
                           </button>
