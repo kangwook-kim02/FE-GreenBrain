@@ -42,8 +42,9 @@ export function useModels() {
     }
   )
 
+  const EXCLUDED_PROVIDERS = ['runyour', 'deepseek', 'upstage']
   const models = data?.items
-    .filter((v) => v !== 'runyour/free')
+    .filter((v) => !EXCLUDED_PROVIDERS.some((p) => v.startsWith(`${p}/`)))
     .map(parseModel) ?? []
 
   return {
