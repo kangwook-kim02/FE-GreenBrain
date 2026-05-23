@@ -9,6 +9,7 @@ import ChallengeModal from '@/components/ChallengeModal'
 import { useApp } from '@/contexts/AppContext'
 import { apiFetch } from '@/lib/api'
 import MarkdownContent from '@/components/MarkdownContent'
+import { invalidateSessionsCache } from '@/components/ChatSidebar'
 
 interface Model {
   label: string
@@ -182,6 +183,7 @@ function ChatContent() {
         setCurrentSessionId(sessionId)
         justCreatedSessionRef.current = true
         router.replace(`/chat?sid=${sessionId}`)
+        invalidateSessionsCache()
       }
       const data = await apiFetch<ChatMessageResponse>(
         `/api/chat/sessions/${sessionId}/messages`,
