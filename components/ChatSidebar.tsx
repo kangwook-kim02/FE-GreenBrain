@@ -3,7 +3,10 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import useSWR, { mutate } from 'swr'
 import { apiFetch } from '@/lib/api'
+import { fetcher } from '@/lib/fetcher'
+import { SESSIONS_KEY } from '@/lib/sessions'
 
 interface ChatSession {
   id: string
@@ -71,9 +74,14 @@ export default function ChatSidebar({ open, onClose }: Props) {
   const searchParams = useSearchParams()
   const currentSid = searchParams.get('sid')
 
-  const [sessions, setSessions] = useState<ChatSession[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [sessionsError, setSessionsError] = useState('')
+  const { data, error, isLoading } = useSWR<{ items: ChatSession[] }>(
+    SESSIONS_KEY,
+    fetcher,
+    { revalidateIfStale: false, revalidateOnFocus: false }
+  )
+  const sessions = data?.items ?? []
+  const sessionsError = error ? '세션 목록을 불러올 수 없습니다.' : ''
+
   const [contextMenu, setContextMenu] = useState<{ sessionId: string; x: number; y: number } | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingTitle, setEditingTitle] = useState('')
@@ -84,17 +92,6 @@ export default function ChatSidebar({ open, onClose }: Props) {
     router.push('/chat')
     if (window.innerWidth < 640) onClose()
   }
-
-  // currentSid가 바뀔 때(새 세션 생성·세션 전환) 목록을 재조회한다
-  useEffect(() => {
-    apiFetch<{ items: ChatSession[] }>('/api/chat/sessions')
-      .then((data) => {
-        setSessions(data.items)
-        setSessionsError('')
-      })
-      .catch(() => setSessionsError('세션 목록을 불러올 수 없습니다.'))
-      .finally(() => setIsLoading(false))
-  }, [currentSid])
 
   // editingId가 설정될 때 input에 포커스·전체 선택
   useEffect(() => {
@@ -114,13 +111,19 @@ export default function ChatSidebar({ open, onClose }: Props) {
 
   async function handleDelete(e: React.MouseEvent, sessionId: string) {
     e.stopPropagation()
-    const prev = sessions
-    setSessions((s) => s.filter((x) => x.id !== sessionId))
+    mutate(
+      SESSIONS_KEY,
+      (prev: { items: ChatSession[] } | undefined) => ({
+        items: (prev?.items ?? []).filter((x) => x.id !== sessionId),
+      }),
+      { revalidate: false }
+    )
     try {
       await apiFetch(`/api/chat/sessions/${sessionId}`, { method: 'DELETE' })
       if (currentSid === sessionId) router.push('/chat')
+      mutate(SESSIONS_KEY)
     } catch {
-      setSessions(prev)
+      mutate(SESSIONS_KEY)
     }
   }
 
@@ -148,9 +151,14 @@ export default function ChatSidebar({ open, onClose }: Props) {
 
   async function handleRenameSubmit(sessionId: string) {
     const trimmed = editingTitle.trim()
-    const prev = sessions
-    setSessions((s) =>
-      s.map((x) => (x.id === sessionId ? { ...x, title: trimmed || null } : x))
+    mutate(
+      SESSIONS_KEY,
+      (prev: { items: ChatSession[] } | undefined) => ({
+        items: (prev?.items ?? []).map((x) =>
+          x.id === sessionId ? { ...x, title: trimmed || null } : x
+        ),
+      }),
+      { revalidate: false }
     )
     setEditingId(null)
     try {
@@ -158,8 +166,9 @@ export default function ChatSidebar({ open, onClose }: Props) {
         method: 'PATCH',
         body: { title: trimmed || null },
       })
+      mutate(SESSIONS_KEY)
     } catch {
-      setSessions(prev)
+      mutate(SESSIONS_KEY)
     }
   }
 

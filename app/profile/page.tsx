@@ -140,6 +140,17 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    if (user) {
+      setNameInput(user.nickname ?? '')
+      if (user.profile) {
+        setTransportation(user.profile.transport_mode)
+        setDiet(user.profile.diet_type)
+        setHousing(user.profile.housing_type)
+      }
+      setIsLoading(false)
+      return
+    }
+
     let cancelled = false
     async function loadProfile() {
       try {
@@ -173,7 +184,7 @@ export default function ProfilePage() {
     }
     loadProfile()
     return () => { cancelled = true }
-  }, [setUser])
+  }, [user, setUser])
 
   const handleSaveName = async () => {
     const trimmed = nameInput.trim()
