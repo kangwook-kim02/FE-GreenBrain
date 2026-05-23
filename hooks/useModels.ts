@@ -11,9 +11,9 @@ const PROVIDER_MAP: Record<string, string> = {
   openai: 'OpenAI',
   anthropic: 'Anthropic',
   gemini: 'Google',
-  deepseek: 'DeepSeek',
-  upstage: 'Upstage',
 }
+
+const EXCLUDED_PROVIDERS = ['runyour', 'deepseek', 'upstage']
 
 export function parseModel(value: string): Model {
   const slashIdx = value.indexOf('/')
@@ -42,7 +42,6 @@ export function useModels() {
     }
   )
 
-  const EXCLUDED_PROVIDERS = ['runyour', 'deepseek', 'upstage']
   const models = data?.items
     .filter((v) => !EXCLUDED_PROVIDERS.some((p) => v.startsWith(`${p}/`)))
     .map(parseModel) ?? []
