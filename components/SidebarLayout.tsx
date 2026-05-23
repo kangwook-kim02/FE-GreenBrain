@@ -2,9 +2,10 @@
 
 import { Suspense, useState, useEffect } from 'react'
 import ChatSidebar from './ChatSidebar'
+import SidebarContext from '@/contexts/SidebarContext'
 
 interface Props {
-  children: (toggleButton: React.ReactNode) => React.ReactNode
+  children: React.ReactNode
 }
 
 export default function SidebarLayout({ children }: Props) {
@@ -41,7 +42,9 @@ export default function SidebarLayout({ children }: Props) {
         <ChatSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       </Suspense>
       <div className="flex-1 flex flex-col overflow-hidden">
-        {children(toggleButton)}
+        <SidebarContext.Provider value={{ toggleButton }}>
+          {children}
+        </SidebarContext.Provider>
       </div>
     </div>
   )
