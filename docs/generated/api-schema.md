@@ -13,7 +13,7 @@
 | Method | Path | 설명 | 요청 타입 | 응답 타입 |
 |--------|------|------|----------|----------|
 | GET | `/api/users/me` | 현재 사용자 조회 | 없음 | `UserMe` |
-| PATCH | `/api/users/me` | 기본 프로필 수정 | `{ nickname?, profile_image_url? }` | `{ id, email, nickname, profile_image_url, updated_at }` |
+| PATCH | `/api/users/me` | 기본 프로필 수정 | `multipart/form-data { nickname?, profile_image? }` | `{ success, message, data: { id, email, nickname, profile_image_url, updated_at } }` |
 | GET | `/api/users/profile` | 생활습관 프로필 조회 | 없음 | `UserProfile & { updated_at }` |
 | PATCH | `/api/users/profile` | 생활습관 프로필 수정 | `{ transport_mode?, diet_type?, housing_type? }` | `UserProfile & { updated_at }` |
 | POST | `/api/users/onboarding` | 온보딩 생활습관 저장 | `{ transport_mode, diet_type, housing_type }` | 201: `{ transport_mode, diet_type, housing_type }` |

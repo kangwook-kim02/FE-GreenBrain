@@ -118,8 +118,8 @@ GET /api/users/me
 → AppContext user, tokens 초기화에 사용
 
 PATCH /api/users/me
-Body:    { nickname?: string; profile_image_url?: string }
-200:     { id, email, nickname, profile_image_url, updated_at }
+Body:    multipart/form-data { nickname?: string; profile_image?: File }
+200:     { success: boolean; message: string; data: { id: string; email: string; nickname: string | null; profile_image_url: string | null; updated_at: string } }
 401:     인증되지 않은 사용자
 422:     요청 형식 오류
 

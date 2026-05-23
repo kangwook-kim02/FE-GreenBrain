@@ -193,9 +193,11 @@ export default function ProfilePage() {
     setIsSavingName(true)
     setNameError('')
     try {
+      const formData = new FormData()
+      formData.append('nickname', trimmed)
       await apiFetch('/api/users/me', {
         method: 'PATCH',
-        body: { nickname: trimmed },
+        body: formData,
       })
       setUser(user ? { ...user, nickname: trimmed } : null)
       setEditingName(false)
@@ -274,13 +276,13 @@ export default function ProfilePage() {
     setIsUploadingAvatar(true)
     setAvatarError('')
     const formData = new FormData()
-    formData.append('avatar', fileInputRef.current.files[0])
+    formData.append('profile_image', fileInputRef.current.files[0])
     try {
-      const data = await apiFetch<{ profile_image_url: string }>('/api/users/me', {
+      const res = await apiFetch<{ success: boolean; message: string; data: { profile_image_url: string | null } }>('/api/users/me', {
         method: 'PATCH',
         body: formData,
       })
-      setUser(user ? { ...user, profile_image_url: data.profile_image_url } : null)
+      setUser(user ? { ...user, profile_image_url: res.data.profile_image_url } : null)
       setAvatarPreview(null)
     } catch {
       setAvatarError('프로필 사진 변경에 실패했습니다.')
