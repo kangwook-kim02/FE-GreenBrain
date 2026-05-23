@@ -10,35 +10,8 @@ import { useApp } from '@/contexts/AppContext'
 import { apiFetch } from '@/lib/api'
 import MarkdownContent from '@/components/MarkdownContent'
 import { invalidateSessionsCache } from '@/lib/sessions'
-
-interface Model {
-  label: string
-  value: string
-  provider: string
-}
-
-const PROVIDER_MAP: Record<string, string> = {
-  openai: 'OpenAI',
-  anthropic: 'Anthropic',
-  gemini: 'Google',
-  deepseek: 'DeepSeek',
-  upstage: 'Upstage',
-}
-
-function parseModel(value: string): Model {
-  const slashIdx = value.indexOf('/')
-  const providerKey = value.slice(0, slashIdx)
-  const modelId = value.slice(slashIdx + 1).replace(/-\d{4}-\d{2}-\d{2}$/, '')
-  const label = modelId
-    .split('-')
-    .map((seg) => {
-      if (seg === 'gpt') return 'GPT'
-      if (/^\d/.test(seg)) return seg
-      return seg.charAt(0).toUpperCase() + seg.slice(1)
-    })
-    .join('-')
-  return { label, value, provider: PROVIDER_MAP[providerKey] ?? providerKey }
-}
+import { useModels } from '@/hooks/useModels'
+import type { Model } from '@/hooks/useModels'
 
 interface Message {
   id: string
@@ -85,9 +58,7 @@ function ChatContent() {
   const [isHistoryLoading, setIsHistoryLoading] = useState(false)
   const [historyError, setHistoryError] = useState(false)
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(sid)
-  const [models, setModels] = useState<Model[]>([])
-  const [isModelsLoading, setIsModelsLoading] = useState(true)
-  const [modelsError, setModelsError] = useState('')
+  const { models, isModelsLoading, modelsError } = useModels()
   const [selectedModel, setSelectedModel] = useState('')
   const [modelDropdownOpen, setModelDropdownOpen] = useState(false)
   const [challengeModalOpen, setChallengeModalOpen] = useState(false)
@@ -128,15 +99,10 @@ function ChatContent() {
   }, [sid])
 
   useEffect(() => {
-    apiFetch<{ items: string[] }>('/api/chat/models')
-      .then((data) => {
-        const parsed = data.items.filter((v) => v !== 'runyour/free').map(parseModel);
-        setModels(parsed)
-        if (parsed.length > 0) setSelectedModel(parsed[0].value)
-      })
-      .catch(() => setModelsError('모델 목록을 불러올 수 없습니다.'))
-      .finally(() => setIsModelsLoading(false))
-  }, [])
+    if (models.length > 0 && !selectedModel) {
+      setSelectedModel(models[0].value)
+    }
+  }, [models, selectedModel])
 
   useEffect(() => {
     apiFetch<{ tokens_remaining: number }>('/api/tokens/today')
