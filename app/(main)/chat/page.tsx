@@ -10,7 +10,6 @@ import { apiFetch } from '@/lib/api'
 import MarkdownContent from '@/components/MarkdownContent'
 import { invalidateSessionsCache } from '@/lib/sessions'
 import { useModels } from '@/hooks/useModels'
-import type { Model } from '@/hooks/useModels'
 import { useSidebar } from '@/contexts/SidebarContext'
 
 interface Message {
