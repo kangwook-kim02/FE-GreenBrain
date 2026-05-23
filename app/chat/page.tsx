@@ -9,7 +9,7 @@ import ChallengeModal from '@/components/ChallengeModal'
 import { useApp } from '@/contexts/AppContext'
 import { apiFetch } from '@/lib/api'
 import MarkdownContent from '@/components/MarkdownContent'
-import { invalidateSessionsCache } from '@/components/ChatSidebar'
+import { invalidateSessionsCache } from '@/lib/sessions'
 
 interface Model {
   label: string

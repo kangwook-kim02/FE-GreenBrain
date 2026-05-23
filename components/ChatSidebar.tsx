@@ -6,8 +6,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import useSWR, { mutate } from 'swr'
 import { apiFetch } from '@/lib/api'
 import { fetcher } from '@/lib/fetcher'
-
-const SESSIONS_KEY = '/api/chat/sessions'
+import { SESSIONS_KEY } from '@/lib/sessions'
 
 interface ChatSession {
   id: string
@@ -67,10 +66,6 @@ function groupSessionsByDate(sessions: ChatSession[]) {
   }
 
   return groups.filter((g) => g.items.length > 0)
-}
-
-export function invalidateSessionsCache() {
-  mutate(SESSIONS_KEY)
 }
 
 export default function ChatSidebar({ open, onClose }: Props) {
