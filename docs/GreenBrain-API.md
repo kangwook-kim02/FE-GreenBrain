@@ -1231,3 +1231,681 @@ Example
 | 200 | 조회 성공 |
 | 400 | 인증 필요 |
 | 502  | RunyourAI 프로파이더 오류 |
+
+
+---
+## 응답 형식 update 20260524
+
+### 유저 조회
+**Example**
+
+```json
+{
+  "success": true,
+  "message": "조회 성공",
+  "data": {
+    "id": "42e6399d-5532-4162-a9e0-dd53f645260b",
+    "email": "taehwan011@gmail.com",
+    "nickname": "hwaaaan",
+    "profile_image_url": "/uploads/profile-images/42e6399d-5532-4162-a9e0-dd53f645260b/f9e1bea5-52c1-47db-bac7-31ff3f462392.webp",
+    "onboarding_completed": true,
+    "profile": {
+      "transport_mode": "transit",
+      "diet_type": "omnivore",
+      "housing_type": "apartment"
+    },
+    "today_tokens": {
+      "date": "2026-05-24",
+      "tokens_remaining": 150
+    }
+  }
+}
+
+```
+
+### 유저 수정
+**Example**
+
+```json
+{
+  "success": true,
+  "message": "수정되었습니다.",
+  "data": {
+    "id": "42e6399d-5532-4162-a9e0-dd53f645260b",
+    "email": "taehwan011@gmail.com",
+    "nickname": "hwaaaan",
+    "profile_image_url": "/uploads/profile-images/42e6399d-5532-4162-a9e0-dd53f645260b/5cdb6507-5aa4-456d-8b7b-8723c46400ea.webp",
+    "updated_at": "2026-05-23T15:07:32.985903Z"
+  }
+}
+```
+
+### 생활습관 프로필 조회
+**Example**
+
+```json
+{
+  "success": true,
+  "message": "조회 성공",
+  "data": {
+    "transport_mode": "car",
+    "diet_type": "omnivore",
+    "housing_type": "apartment",
+    "updated_at": "2026-05-23T15:15:19.807301Z"
+  }
+}
+```
+
+### 생활습관 프로필 수정
+**Example**
+
+```json
+{
+  "success": true,
+  "message": "수정되었습니다.",
+  "data": {
+    "transport_mode": "car",
+    "diet_type": "omnivore",
+    "housing_type": "apartment",
+    "updated_at": "2026-05-23T15:15:19.807301Z"
+  }
+}
+```
+
+### 온보딩
+**Example**
+
+```jsx
+{
+  "success": true,
+  "message": "온보딩이 완료되었습니다.",
+  "data": {
+    "transport_mode": "car",
+    "diet_type": "omnivore",
+    "housing_type": "apartment",
+    "updated_at": "2026-05-23T15:15:19.807301Z"
+  }
+}
+```
+
+### 회원가입
+**Example**
+
+```jsx
+{
+  "success": true,
+  "message": "회원가입이 완료되었습니다.",
+  "data": {
+    "id": "ea3a4d4e-379b-4eb8-afc5-034da98cddae",
+    "email": "taehwan12@gmail.com",
+    "onboarding_completed": false,
+    "created_at": "2026-05-23T14:50:39.401293Z"
+  }
+}
+```
+
+### 로그인
+Example
+
+```python
+{
+  "success": true,
+  "message": "로그인되었습니다.",
+  "data": {
+    "onboarding_completed": true
+  }
+}
+```
+
+### 로그아웃
+### Example
+
+```python
+{
+  "success": true,
+  "message": "로그아웃되었습니다.",
+  "data": null
+}
+```
+
+
+### 채팅 전송
+**Example**
+
+```json
+{
+  "message_id": "35393d67-7ad4-42c3-8c44-dac661f0d48e",
+  "response_message_id": "87914fc1-1ff0-42b7-8bdd-d486917c2eea",
+  "response": "안녕하세요 🙂  \n오늘은 무슨 이야기를 나눠볼까요?",
+  "carbon_gco2eq": 0.00790069079248988,
+  "tokens_remaining": 149.5738076049075,
+  "exhausted": false,
+  "session_title": null,
+  "model_id": "openai/gpt-5.4-mini-2026-03-17"
+}
+```
+
+### 채팅 메시지 조회
+**Example**
+
+```json
+{
+  "items": [
+    {
+      "id": "3131fffd-d126-4b24-a6a9-e9f03035854f",
+      "session_id": "322890dd-2f1c-424b-8125-d3ce9f040281",
+      "role": "user",
+      "content": "안녕",
+      "carbon_gco2eq": null,
+      "model_id": null,
+      "created_at": "2026-05-19T05:06:23.933874Z"
+    },
+    {
+      "id": "f1e0ad87-8005-48b5-928c-710939fd8c0e",
+      "session_id": "322890dd-2f1c-424b-8125-d3ce9f040281",
+      "role": "assistant",
+      "content": "안녕하세요! 😊 반갑습니다! 무엇을 도와드릴까요?",
+      "carbon_gco2eq": 0.0970438300553649,
+      "model_id": "anthropic/claude-opus-4-6",
+      "created_at": "2026-05-19T05:06:27.375700Z"
+    },
+  ],
+  "next_cursor": null
+}
+```
+
+### 채팅 세션 생성
+
+**Example**
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "title": null,
+  "created_at": "2026-05-14T00:00:00Z",
+  "updated_at": "2026-05-14T00:00:00Z"
+}
+```
+
+### 채팅 세션 조회
+
+**Example**
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "title": "탄소 절약 방법",
+      "created_at": "2026-05-14T00:00:00Z",
+      "updated_at": "2026-05-14T00:00:00Z"
+    }
+  ],
+  "next_cursor": null
+}
+```
+
+### 채팅 세션 수정
+**Example**
+
+```json
+{
+  "id": "uuid",
+  "title": "나의 채팅",
+  "created_at": "2026-05-14T00:00:00Z",
+  "updated_at": "2026-05-14T00:00:00Z"
+}
+```
+
+
+### 모델 조회
+**Example**
+
+```jsx
+{
+  "items": [
+    "runyour/free",
+    "openai/gpt-5.5-2026-04-23",
+    "openai/gpt-5.5-pro-2026-04-23",
+    "openai/gpt-5.4-2026-03-05",
+    "openai/gpt-5.4-pro-2026-03-05",
+    "openai/gpt-5.4-mini-2026-03-17",
+    "openai/gpt-5.4-nano-2026-03-17",
+    "openai/gpt-5.3-codex",
+    "openai/gpt-5.2",
+    "openai/gpt-5.1",
+    "openai/gpt-5",
+    "openai/gpt-5-mini-2025-08-07",
+    "openai/gpt-5-nano-2025-08-07",
+    "openai/gpt-4.1-2025-04-14",
+    "openai/gpt-image-1.5",
+    "anthropic/claude-opus-4-7",
+    "anthropic/claude-opus-4-6",
+    "anthropic/claude-opus-4-5",
+    "anthropic/claude-sonnet-4-6",
+    "anthropic/claude-sonnet-4-5",
+    "anthropic/claude-haiku-4-5",
+    "gemini/gemini-3.1-pro-preview",
+    "gemini/gemini-3-flash-preview",
+    "gemini/gemini-2.5-pro",
+    "gemini/gemini-2.5-flash",
+    "gemini/gemini-2.5-flash-lite",
+    "gemini/gemini-3-pro-image-preview",
+    "gemini/gemini-3.1-flash-image-preview",
+    "deepseek/deepseek-chat",
+    "upstage/solar-pro3",
+    "upstage/solar-pro2"
+  ]
+}
+```
+
+### 토큰 조회
+**Example**
+
+```json
+{
+  "success": true,
+  "message": "조회 성공",
+  "data": {
+    "date": "2026-05-24",
+    "tokens_remaining": 150,
+    "upload_reward_given": 0,
+    "like_reward_given": 0,
+    "total_reward_given": 0,
+    "challenge_count": 0,
+    "updated_at": "2026-05-23T15:03:49.954264Z"
+  }
+}
+```
+
+## update 20260524
+
+### 채팅 전송
+**Example**
+
+```json
+{
+    "success": true,
+    "message": "메시지가 전송되었습니다.",
+    "data": {
+      "message_id": "uuid",
+      "response_message_id": "uuid",
+      "response": "오늘은 대중교통을...",
+      "carbon_gco2eq": 0.0012,
+      "tokens_remaining": 950.0,
+      "exhausted": false,
+      "session_title": "탄소 절약 방법",
+      "model_id": "openai/gpt-4.1-2025-04-14"
+    }
+  }
+```
+
+### 채팅 메시지 조회
+**Example**
+
+```json
+{
+  "success": true,
+  "message": "조회 성공",
+  "data": {
+    "items": [
+      {
+        "id": "3131fffd-d126-4b24-a6a9-e9f03035854f",
+        "session_id": "322890dd-2f1c-424b-8125-d3ce9f040281",
+        "role": "user",
+        "content": "안녕",
+        "carbon_gco2eq": null,
+        "model_id": null,
+        "created_at": "2026-05-19T05:06:23.933874Z"
+      },
+      {
+        "id": "f1e0ad87-8005-48b5-928c-710939fd8c0e",
+        "session_id": "322890dd-2f1c-424b-8125-d3ce9f040281",
+        "role": "assistant",
+        "content": "안녕하세요! 😊 반갑습니다! 무엇을 도와드릴까요?",
+        "carbon_gco2eq": 0.0970438300553649,
+        "model_id": "anthropic/claude-opus-4-6",
+        "created_at": "2026-05-19T05:06:27.375700Z"
+      },
+      {
+        "id": "b533841e-5b4b-49be-a114-356a7b97d2f6",
+        "session_id": "322890dd-2f1c-424b-8125-d3ce9f040281",
+        "role": "user",
+        "content": "안녕",
+        "carbon_gco2eq": null,
+        "model_id": null,
+        "created_at": "2026-05-19T05:07:09.638661Z"
+      },
+      {
+        "id": "688470e4-7503-445b-a2d1-4735fc2ccbc2",
+        "session_id": "322890dd-2f1c-424b-8125-d3ce9f040281",
+        "role": "assistant",
+        "content": "안녕하세요! 또 인사 주셨네요. 😊 오늘 하루는 어떻게 보내고 계신가요? 궁금한 점이 있으시거나, 함께 나누고 싶은 이야기가 있다면 언제든 말씀해 주세요.",
+        "carbon_gco2eq": 0.254274860100079,
+        "model_id": "gemini/gemini-3.1-flash-image-preview",
+        "created_at": "2026-05-19T05:07:11.986377Z"
+      },
+      {
+        "id": "cb8a03a1-17e2-46d4-a7ec-124510cc5a23",
+        "session_id": "322890dd-2f1c-424b-8125-d3ce9f040281",
+        "role": "user",
+        "content": "안녕",
+        "carbon_gco2eq": null,
+        "model_id": null,
+        "created_at": "2026-05-19T05:07:34.639706Z"
+      },
+      {
+        "id": "9b18ea4c-3bd6-4654-913e-5257aa39367a",
+        "session_id": "322890dd-2f1c-424b-8125-d3ce9f040281",
+        "role": "assistant",
+        "content": "안녕 🙂  \n세 번이나 인사해 줘서 고마워.\n\n나도 계속 대답해 줄 수 있어.  \n이번엔 인사 말고, 딱 한 가지만 알려줘:\n\n- 궁금한 거 하나  \n  또는  \n- 그냥 잡담하고 싶은 주제 하나\n\n예: 게임, 연애, 공부, 진로, 영화 추천, 아무거나!",
+        "carbon_gco2eq": 0.0669730141448915,
+        "model_id": "openai/gpt-5.1",
+        "created_at": "2026-05-19T05:07:37.190885Z"
+      },
+      {
+        "id": "35393d67-7ad4-42c3-8c44-dac661f0d48e",
+        "session_id": "322890dd-2f1c-424b-8125-d3ce9f040281",
+        "role": "user",
+        "content": "안녕",
+        "carbon_gco2eq": null,
+        "model_id": null,
+        "created_at": "2026-05-19T05:08:12.291565Z"
+      },
+      {
+        "id": "87914fc1-1ff0-42b7-8bdd-d486917c2eea",
+        "session_id": "322890dd-2f1c-424b-8125-d3ce9f040281",
+        "role": "assistant",
+        "content": "안녕하세요 🙂  \n오늘은 무슨 이야기를 나눠볼까요?",
+        "carbon_gco2eq": 0.00790069079248988,
+        "model_id": "openai/gpt-5.4-mini-2026-03-17",
+        "created_at": "2026-05-19T05:08:13.638656Z"
+      }
+    ],
+    "next_cursor": null
+  }
+}
+```
+
+### 채팅 세션 생성
+**Example**
+
+```json
+{
+  "success": true,
+  "message": "세션이 생성되었습니다.",
+  "data": {
+    "id": "f1cfd64f-ee4b-4d44-a3c1-18ac0eb2a9b9",
+    "title": null,
+    "created_at": "2026-05-23T16:54:33.522613Z",
+    "updated_at": "2026-05-23T16:54:33.522613Z"
+  }
+}
+```
+
+### 채팅 세션 조회
+**Example**
+
+```json
+{
+  "success": true,
+  "message": "조회 성공",
+  "data": {
+    "items": [
+      {
+        "id": "762e6006-c44b-4d66-a9ad-bd371acb5ad8",
+        "title": "이름이 궁금해!",
+        "created_at": "2026-05-14T05:47:29.934437Z",
+        "updated_at": "2026-05-14T05:55:18.235418Z"
+      },
+      {
+        "id": "0355fdfb-b493-4fbe-9978-2c39888ef49a",
+        "title": "오늘의 날씨 정보",
+        "created_at": "2026-05-14T03:25:26.128098Z",
+        "updated_at": "2026-05-14T03:32:32.534241Z"
+      },
+      {
+        "id": "0eab6d95-a6c4-4357-aed9-e7845c36e5ca",
+        "title": null,
+        "created_at": "2026-05-14T03:20:44.675490Z",
+        "updated_at": "2026-05-14T03:20:44.675490Z"
+      }
+    ],
+    "next_cursor": null
+  }
+}
+```
+
+### 채팅 세션 수정
+
+**Example**
+
+```json
+{
+  "success": true,
+  "message": "수정되었습니다.",
+  "data": {
+    "id": "uuid",
+    "title": "나의 채팅",
+    "created_at": "2026-05-14T00:00:00Z",
+    "updated_at": "2026-05-14T00:00:00Z"
+   }
+}
+```
+
+### 채팅 세션 삭제
+
+#### Example
+
+```python
+{
+    "success": true,
+    "message": "세션이 삭제되었습니다.",
+    "data": null
+  }
+```
+
+### 모델 조회
+**Example**
+
+```jsx
+{
+  "success": true,
+  "message": "조회 성공",
+  "data": {
+    "items": [
+      "runyour/free",
+      "openai/gpt-5.5-2026-04-23",
+      "openai/gpt-5.5-pro-2026-04-23",
+      "openai/gpt-5.4-2026-03-05",
+      "openai/gpt-5.4-pro-2026-03-05",
+      "openai/gpt-5.4-mini-2026-03-17",
+      "openai/gpt-5.4-nano-2026-03-17",
+      "openai/gpt-5.3-codex",
+      "openai/gpt-5.2",
+      "openai/gpt-5.1",
+      "openai/gpt-5",
+      "openai/gpt-5-mini-2025-08-07",
+      "openai/gpt-5-nano-2025-08-07",
+      "openai/gpt-4.1-2025-04-14",
+      "openai/gpt-image-1.5",
+      "anthropic/claude-opus-4-7",
+      "anthropic/claude-opus-4-6",
+      "anthropic/claude-opus-4-5",
+      "anthropic/claude-sonnet-4-6",
+      "anthropic/claude-sonnet-4-5",
+      "anthropic/claude-haiku-4-5",
+      "gemini/gemini-3.1-pro-preview",
+      "gemini/gemini-3-flash-preview",
+      "gemini/gemini-2.5-pro",
+      "gemini/gemini-2.5-flash",
+      "gemini/gemini-2.5-flash-lite",
+      "gemini/gemini-3-pro-image-preview",
+      "gemini/gemini-3.1-flash-image-preview",
+      "deepseek/deepseek-chat",
+      "upstage/solar-pro3",
+      "upstage/solar-pro2"
+    ]
+  }
+}
+```
+
+### 챌린지 조회
+**Example**
+
+```jsx
+{
+    "success": true,
+    "message": "조회 성공",
+    "data": {
+      "challenge": {
+        "id": "c1a2b3d4-1111-2222-3333-444455556666",
+        "category": "energy",
+        "title": "오늘 에어컨 1시간 줄이기",
+        "description": "오늘 하루 에어컨 사용 시간을 평소보다 1시간 줄여보세요.",
+        "difficulty": 1,
+        "status": "active",
+        "created_at": "2026-05-04T12:00:00Z",
+        "completed_at": null
+      }
+    }
+  }
+```
+
+```jsx
+{
+  "success": true,
+  "message": "조회 성공",
+  "data": {
+    "challenge": null
+  }
+}
+```
+
+### 챌린지 생성
+
+**Example**
+
+```jsx
+{
+  "success": true,
+  "message": "챌린지가 생성되었습니다.",
+  "data": {
+	  "challenge": {
+	    "id": "c1a2b3d4-1111-2222-3333-444455556666",
+	    "category": "transport",
+	    "title": "가까운 거리는 도보로 이동하기",
+	    "description": "오늘 1km 이내 이동은 자동차 대신 걸어서 이동해보세요.",
+	    "difficulty": 1,
+	    "status": "pending_acceptance",
+	    "created_at": "2026-05-04T12:00:00Z",
+	    "completed_at": null
+	  },
+	  "created": true
+	} 
+}
+```
+
+```jsx
+// 이미 진행 중인 챌린지가 있는 경우
+{
+	"success": true,
+  "message": "기존 챌린지를 반환합니다.",
+  "data": {
+	  "challenge": {
+	    "id": "c1a2b3d4-1111-2222-3333-444455556666",
+	    "category": "transport",
+	    "title": "가까운 거리는 도보로 이동하기",
+	    "description": "오늘 1km 이내 이동은 자동차 대신 걸어서 이동해보세요.",
+	    "difficulty": 1,
+	    "status": "pending_acceptance",
+	    "created_at": "2026-05-04T12:00:00Z",
+	    "completed_at": null
+	  },
+	  "created": false
+	 }
+}
+```
+
+### 챌린지 수락
+
+**Example**
+
+```jsx
+{
+    "success": true,
+    "message": "챌린지를 수락했습니다.",
+    "data": {
+      "challenge": {
+        "id": "c1a2b3d4-1111-2222-3333-444455556666",
+        "category": "transport",
+        "title": "가까운 거리는 도보로 이동하기",
+        "description": "오늘 1km 이내 이동은 자동차 대신 걸어서 이동해보세요.",
+        "difficulty": 1,
+        "status": "active",
+        "created_at": "2026-05-04T12:00:00Z",
+        "completed_at": null
+      }
+    }
+  }
+```
+
+### 챌린지 사진 업로드
+
+**Example**
+
+```jsx
+ {
+    "success": true,
+    "message": "사진이 업로드되었습니다.",
+    "data": {
+      "photo": {
+        "id": "photo_uuid",
+        "challenge_id": "challenge_uuid",
+        "file_url": "https://...",
+        "created_at": "2026-05-15T12:00:00Z"
+      },
+      "challenge": {
+        "id": "challenge_uuid",
+        "status": "completed",
+        "completed_at": "2026-05-15T12:00:00Z"
+      },
+      "reward": {
+        "type": "upload_reward",
+        "reward_amount": 20.0,
+        "tokens_remaining": 120.0
+      }
+    }
+  }
+```
+
+### 챌린지 피드 조회
+**Example**
+
+```jsx
+{
+    "success": true,
+    "message": "조회 성공",
+    "data": {
+      "items": [
+        {
+          "photo_id": "p1a2b3d4-1111-2222-3333-444455556666",
+          "challenge_id": "c1a2b3d4-1111-2222-3333-444455556666",
+          "user_id": "u1a2b3d4-1111-2222-3333-444455556666",
+          "nickname": "GreenUser",
+          "profile_image_url": "https://example.com/profile.png",
+          "title": "오늘 에어컨 1시간 줄이기",
+          "category": "energy",
+          "photo_url": "https://...",
+          "like_count": 4,
+          "liked_by_me": true,
+          "carbon_saved_gco2eq": null,
+          "created_at": "2026-05-04T13:00:00Z"
+        }
+      ],
+      "total": 1,
+      "limit": 20,
+      "offset": 0
+    }
+  }
+```

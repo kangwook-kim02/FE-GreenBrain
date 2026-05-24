@@ -155,8 +155,9 @@ export default function ProfilePage() {
     let cancelled = false
     async function loadProfile() {
       try {
-        const data = await apiFetch<UserMeResponse>('/api/users/me')
+        const res = await apiFetch<{ success: boolean; message: string; data: UserMeResponse }>('/api/users/me')
         if (cancelled) return
+        const data = res.data
         setUser({
           id: data.id,
           email: data.email,

@@ -74,12 +74,13 @@ export default function ChatSidebar({ open, onClose }: Props) {
   const searchParams = useSearchParams()
   const currentSid = searchParams.get('sid')
 
-  const { data, error, isLoading } = useSWR<{ items: ChatSession[] }>(
+  type SessionsResponse = { success: boolean; message: string; data: { items: ChatSession[] } }
+  const { data, error, isLoading } = useSWR<SessionsResponse>(
     SESSIONS_KEY,
     fetcher,
     { revalidateIfStale: false, revalidateOnFocus: false }
   )
-  const sessions = data?.items ?? []
+  const sessions = data?.data?.items ?? []
   const sessionsError = error ? '세션 목록을 불러올 수 없습니다.' : ''
 
   const [contextMenu, setContextMenu] = useState<{ sessionId: string; x: number; y: number } | null>(null)
@@ -113,8 +114,9 @@ export default function ChatSidebar({ open, onClose }: Props) {
     e.stopPropagation()
     mutate(
       SESSIONS_KEY,
-      (prev: { items: ChatSession[] } | undefined) => ({
-        items: (prev?.items ?? []).filter((x) => x.id !== sessionId),
+      (prev: SessionsResponse | undefined) => ({
+        ...prev,
+        data: { items: (prev?.data?.items ?? []).filter((x) => x.id !== sessionId) },
       }),
       { revalidate: false }
     )
@@ -153,10 +155,13 @@ export default function ChatSidebar({ open, onClose }: Props) {
     const trimmed = editingTitle.trim()
     mutate(
       SESSIONS_KEY,
-      (prev: { items: ChatSession[] } | undefined) => ({
-        items: (prev?.items ?? []).map((x) =>
-          x.id === sessionId ? { ...x, title: trimmed || null } : x
-        ),
+      (prev: SessionsResponse | undefined) => ({
+        ...prev,
+        data: {
+          items: (prev?.data?.items ?? []).map((x) =>
+            x.id === sessionId ? { ...x, title: trimmed || null } : x
+          ),
+        },
       }),
       { revalidate: false }
     )

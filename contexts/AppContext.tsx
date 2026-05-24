@@ -57,11 +57,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     let cancelled = false
     async function bootstrap() {
       try {
-        const data = await apiFetch<UserMeResponse>('/api/users/me')
+        const res = await apiFetch<{ success: boolean; message: string; data: UserMeResponse }>('/api/users/me')
         if (cancelled) return
-        const { today_tokens, ...userFields } = data
-        const onboardingCompleted = data.onboarding_completed
-          ?? (data.id ? localStorage.getItem(`greenbrain_ob_${data.id}`) !== 'false' : true)
+        const { today_tokens, ...userFields } = res.data
+        const onboardingCompleted = userFields.onboarding_completed
+          ?? (userFields.id ? localStorage.getItem(`greenbrain_ob_${userFields.id}`) !== 'false' : true)
         setUser({ ...userFields, onboarding_completed: onboardingCompleted })
         if (today_tokens) {
           setTokens((prev) => ({ ...prev, remaining: today_tokens.tokens_remaining }))

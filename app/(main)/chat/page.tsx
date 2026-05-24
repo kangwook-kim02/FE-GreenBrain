@@ -83,10 +83,10 @@ function ChatContent() {
     if (!sid) return
 
     setIsHistoryLoading(true)
-    apiFetch<{ items: ChatMessageFromApi[] }>(`/api/chat/sessions/${sid}/messages`)
-      .then((data) => {
+    apiFetch<{ success: boolean; message: string; data: { items: ChatMessageFromApi[]; next_cursor: string | null } }>(`/api/chat/sessions/${sid}/messages`)
+      .then((res) => {
         setMessages(
-          data.items.map((m) => ({
+          res.data.items.map((m) => ({
             id: m.id,
             role: m.role,
             content: m.content,
@@ -105,8 +105,8 @@ function ChatContent() {
   }, [models, selectedModel])
 
   useEffect(() => {
-    apiFetch<{ tokens_remaining: number }>('/api/tokens/today')
-      .then((data) => updateRemainingTokens(data.tokens_remaining))
+    apiFetch<{ success: boolean; message: string; data: { tokens_remaining: number } }>('/api/tokens/today')
+      .then((res) => updateRemainingTokens(res.data.tokens_remaining))
       .catch(() => {})
       .finally(() => setIsTokenLoading(false))
   }, [updateRemainingTokens])
@@ -144,26 +144,26 @@ function ChatContent() {
     try {
       let sessionId = currentSessionId
       if (!sessionId) {
-        const session = await apiFetch<{ id: string }>('/api/chat/sessions', { method: 'POST' })
-        sessionId = session.id
+        const session = await apiFetch<{ success: boolean; message: string; data: { id: string } }>('/api/chat/sessions', { method: 'POST' })
+        sessionId = session.data.id
         setCurrentSessionId(sessionId)
         justCreatedSessionRef.current = true
         router.replace(`/chat?sid=${sessionId}`)
         invalidateSessionsCache()
       }
-      const data = await apiFetch<ChatMessageResponse>(
+      const res = await apiFetch<{ success: boolean; message: string; data: ChatMessageResponse }>(
         `/api/chat/sessions/${sessionId}/messages`,
         { method: 'POST', body: { message: text, model_id: selectedModel } }
       )
-      updateRemainingTokens(data.tokens_remaining)
+      updateRemainingTokens(res.data.tokens_remaining)
 
       setMessages((prev) => [
         ...prev,
         {
-          id: data.response_message_id,
+          id: res.data.response_message_id,
           role: 'assistant',
-          content: data.response,
-          carbonCost: data.carbon_gco2eq,
+          content: res.data.response,
+          carbonCost: res.data.carbon_gco2eq,
         },
       ])
     } catch (err) {

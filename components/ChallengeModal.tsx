@@ -66,28 +66,29 @@ export default function ChallengeModal({ open, onClose, onReward }: ChallengeMod
 
     async function fetchChallenge() {
       try {
-        const data = await apiFetch<{ challenge: ChallengeData | null; daily_count: number }>(
+        const res = await apiFetch<{ success: boolean; message: string; data: { challenge: ChallengeData | null } }>(
           '/api/challenges/current'
         )
         if (cancelled) return
-        setDailyCount(data.daily_count)
 
-        if (data.challenge) {
-          setChallenge(data.challenge)
-          if (data.challenge.status === 'active') setStep(2)
-        } else if (data.daily_count < 3) {
+        if (res.data.challenge) {
+          setChallenge(res.data.challenge)
+          if (res.data.challenge.status === 'active') setStep(2)
+        } else {
           try {
-            const genData = await apiFetch<{ challenge: ChallengeData; created: boolean }>(
+            const genRes = await apiFetch<{ success: boolean; message: string; data: { challenge: ChallengeData; created: boolean } }>(
               '/api/challenges/generate',
               { method: 'POST' }
             )
             if (cancelled) return
-            setChallenge(genData.challenge)
+            setChallenge(genRes.data.challenge)
           } catch (genErr) {
             const status = (genErr as { status?: number }).status
             if (status === 409) {
               setError('토큰이 남아있어 챌린지를 생성할 수 없습니다.')
-            } else if (status !== 429) {
+            } else if (status === 429) {
+              setDailyCount(3)
+            } else {
               setError('챌린지를 불러올 수 없습니다.')
             }
           }
@@ -135,14 +136,14 @@ export default function ChallengeModal({ open, onClose, onReward }: ChallengeMod
     setIsUploading(true)
     setFileError('')
     const formData = new FormData()
-    formData.append('photo', selectedFile)
+    formData.append('file', selectedFile)
 
     try {
-      const data = await apiFetch<{ remaining_tokens: number }>(
-        `/api/challenges/${challenge.id}/verify`,
+      const res = await apiFetch<{ success: boolean; message: string; data: { photo: { id: string; challenge_id: string; file_url: string; created_at: string }; challenge: { id: string; status: string; completed_at: string }; reward: { type: string; reward_amount: number; tokens_remaining: number } } }>(
+        `/api/challenges/${challenge.id}/photo`,
         { method: 'POST', body: formData }
       )
-      onReward?.(data.remaining_tokens)
+      onReward?.(res.data.reward.tokens_remaining)
       handleClose()
     } catch {
       setFileError('업로드에 실패했습니다. 다시 시도해주세요.')
