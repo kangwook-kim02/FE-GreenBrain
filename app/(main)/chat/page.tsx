@@ -144,7 +144,7 @@ function ChatContent() {
     try {
       let sessionId = currentSessionId
       if (!sessionId) {
-        const session = await apiFetch<{ success: boolean; message: string; data: { id: string } }>('/api/chat/sessions', { method: 'POST' })
+        const session = await apiFetch<{ success: boolean; message: string; data: { id: string } }>('/api/chat/sessions', { method: 'POST', skipAutoRedirect: true })
         sessionId = session.data.id
         setCurrentSessionId(sessionId)
         justCreatedSessionRef.current = true
@@ -153,7 +153,7 @@ function ChatContent() {
       }
       const res = await apiFetch<{ success: boolean; message: string; data: ChatMessageResponse }>(
         `/api/chat/sessions/${sessionId}/messages`,
-        { method: 'POST', body: { message: text, model_id: selectedModel } }
+        { method: 'POST', body: { message: text, model_id: selectedModel }, skipAutoRedirect: true }
       )
       updateRemainingTokens(res.data.tokens_remaining)
 
@@ -179,7 +179,9 @@ function ChatContent() {
             content:
               status === 502
                 ? 'AI 응답 생성에 실패했습니다. 잠시 후 다시 시도해주세요.'
-                : '오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+                : status === 401
+                  ? '인증이 만료되었습니다. 페이지를 새로고침해주세요.'
+                  : '오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
           },
         ])
       }

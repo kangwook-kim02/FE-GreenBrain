@@ -4,10 +4,11 @@ const BASE_URL = ''
 
 type FetchOptions = Omit<RequestInit, 'body'> & {
   body?: Record<string, unknown> | FormData
+  skipAutoRedirect?: boolean
 }
 
 export async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
-  const { body, headers, ...rest } = options
+  const { body, headers, skipAutoRedirect, ...rest } = options
 
   const isFormData = body instanceof FormData
   const requestHeaders: HeadersInit = {
@@ -29,6 +30,9 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
   }
 
   if (response.status === 401 && !path.startsWith('/api/auth/')) {
+    if (skipAutoRedirect) {
+      throw { status: 401 }
+    }
     const pubPaths = ['/login', '/signup']
     if (!pubPaths.some((p) => window.location.pathname.startsWith(p))) {
       window.location.href = '/login'
