@@ -207,8 +207,8 @@ export default function ChallengeFeedPage() {
     setError('')
     setIsLoading(true)
     try {
-      const res = await apiFetch<{ success: boolean; message: string; data: FeedResponse }>('/api/challenges/feed?limit=20&offset=0')
-      setFeedItems(res.data.items)
+      const res = await apiFetch<FeedResponse>('/api/challenges/feed?limit=20&offset=0')
+      setFeedItems(res.items)
     } catch {
       setError('피드를 불러오지 못했습니다.')
     } finally {

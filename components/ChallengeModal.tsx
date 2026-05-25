@@ -66,22 +66,22 @@ export default function ChallengeModal({ open, onClose, onReward }: ChallengeMod
 
     async function fetchChallenge() {
       try {
-        const res = await apiFetch<{ success: boolean; message: string; data: { challenge: ChallengeData | null } }>(
+        const res = await apiFetch<{ challenge: ChallengeData | null }>(
           '/api/challenges/current'
         )
         if (cancelled) return
 
-        if (res.data.challenge) {
-          setChallenge(res.data.challenge)
-          if (res.data.challenge.status === 'active') setStep(2)
+        if (res.challenge) {
+          setChallenge(res.challenge)
+          if (res.challenge.status === 'active') setStep(2)
         } else {
           try {
-            const genRes = await apiFetch<{ success: boolean; message: string; data: { challenge: ChallengeData; created: boolean } }>(
+            const genRes = await apiFetch<{ challenge: ChallengeData; created: boolean }>(
               '/api/challenges/generate',
               { method: 'POST' }
             )
             if (cancelled) return
-            setChallenge(genRes.data.challenge)
+            setChallenge(genRes.challenge)
           } catch (genErr) {
             const status = (genErr as { status?: number }).status
             if (status === 409) {
@@ -139,11 +139,11 @@ export default function ChallengeModal({ open, onClose, onReward }: ChallengeMod
     formData.append('file', selectedFile)
 
     try {
-      const res = await apiFetch<{ success: boolean; message: string; data: { photo: { id: string; challenge_id: string; file_url: string; created_at: string }; challenge: { id: string; status: string; completed_at: string }; reward: { type: string; reward_amount: number; tokens_remaining: number } } }>(
+      const res = await apiFetch<{ photo: { id: string; challenge_id: string; file_url: string; created_at: string }; challenge: { id: string; status: string; completed_at: string }; reward: { type: string; reward_amount: number; tokens_remaining: number } }>(
         `/api/challenges/${challenge.id}/photo`,
         { method: 'POST', body: formData }
       )
-      onReward?.(res.data.reward.tokens_remaining)
+      onReward?.(res.reward.tokens_remaining)
       handleClose()
     } catch {
       setFileError('업로드에 실패했습니다. 다시 시도해주세요.')

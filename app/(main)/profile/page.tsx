@@ -155,9 +155,9 @@ export default function ProfilePage() {
     let cancelled = false
     async function loadProfile() {
       try {
-        const res = await apiFetch<{ success: boolean; message: string; data: UserMeResponse }>('/api/users/me')
+        const res = await apiFetch<UserMeResponse>('/api/users/me')
         if (cancelled) return
-        const data = res.data
+        const data = res
         setUser({
           id: data.id,
           email: data.email,
@@ -279,11 +279,11 @@ export default function ProfilePage() {
     const formData = new FormData()
     formData.append('profile_image', fileInputRef.current.files[0])
     try {
-      const res = await apiFetch<{ success: boolean; message: string; data: { profile_image_url: string | null } }>('/api/users/me', {
+      const res = await apiFetch<{ profile_image_url: string | null }>('/api/users/me', {
         method: 'PATCH',
         body: formData,
       })
-      setUser(user ? { ...user, profile_image_url: res.data.profile_image_url } : null)
+      setUser(user ? { ...user, profile_image_url: res.profile_image_url } : null)
       setAvatarPreview(null)
     } catch {
       setAvatarError('프로필 사진 변경에 실패했습니다.')

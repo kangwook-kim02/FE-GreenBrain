@@ -61,5 +61,6 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
   }
 
   if (response.status === 204) return undefined as T
-  return response.json()
+  const json = await response.json()
+  return (json as { data?: T }).data as T
 }

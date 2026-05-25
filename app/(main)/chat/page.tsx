@@ -83,10 +83,10 @@ function ChatContent() {
     if (!sid) return
 
     setIsHistoryLoading(true)
-    apiFetch<{ success: boolean; message: string; data: { items: ChatMessageFromApi[]; next_cursor: string | null } }>(`/api/chat/sessions/${sid}/messages`)
+    apiFetch<{ items: ChatMessageFromApi[]; next_cursor: string | null }>(`/api/chat/sessions/${sid}/messages`)
       .then((res) => {
         setMessages(
-          res.data.items.map((m) => ({
+          res.items.map((m) => ({
             id: m.id,
             role: m.role,
             content: m.content,
@@ -105,8 +105,8 @@ function ChatContent() {
   }, [models, selectedModel])
 
   useEffect(() => {
-    apiFetch<{ success: boolean; message: string; data: { tokens_remaining: number } }>('/api/tokens/today')
-      .then((res) => updateRemainingTokens(res.data.tokens_remaining))
+    apiFetch<{ tokens_remaining: number }>('/api/tokens/today')
+      .then((res) => updateRemainingTokens(res.tokens_remaining))
       .catch(() => {})
       .finally(() => setIsTokenLoading(false))
   }, [updateRemainingTokens])
@@ -144,26 +144,26 @@ function ChatContent() {
     try {
       let sessionId = currentSessionId
       if (!sessionId) {
-        const session = await apiFetch<{ success: boolean; message: string; data: { id: string } }>('/api/chat/sessions', { method: 'POST', skipAutoRedirect: true })
-        sessionId = session.data.id
+        const session = await apiFetch<{ id: string }>('/api/chat/sessions', { method: 'POST', skipAutoRedirect: true })
+        sessionId = session.id
         setCurrentSessionId(sessionId)
         justCreatedSessionRef.current = true
         router.replace(`/chat?sid=${sessionId}`)
         invalidateSessionsCache()
       }
-      const res = await apiFetch<{ success: boolean; message: string; data: ChatMessageResponse }>(
+      const res = await apiFetch<ChatMessageResponse>(
         `/api/chat/sessions/${sessionId}/messages`,
         { method: 'POST', body: { message: text, model_id: selectedModel }, skipAutoRedirect: true }
       )
-      updateRemainingTokens(res.data.tokens_remaining)
+      updateRemainingTokens(res.tokens_remaining)
 
       setMessages((prev) => [
         ...prev,
         {
-          id: res.data.response_message_id,
+          id: res.response_message_id,
           role: 'assistant',
-          content: res.data.response,
-          carbonCost: res.data.carbon_gco2eq,
+          content: res.response,
+          carbonCost: res.carbon_gco2eq,
         },
       ])
     } catch (err) {
