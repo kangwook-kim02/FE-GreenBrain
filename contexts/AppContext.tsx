@@ -57,9 +57,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     let cancelled = false
     async function bootstrap() {
       try {
-        const res = await apiFetch<{ success: boolean; message: string; data: UserMeResponse }>('/api/users/me')
+        const res = await apiFetch<UserMeResponse>('/api/users/me')
         if (cancelled) return
-        const { today_tokens, ...userFields } = res.data
+        const { today_tokens, ...userFields } = res
         const onboardingCompleted = userFields.onboarding_completed
           ?? (userFields.id ? localStorage.getItem(`greenbrain_ob_${userFields.id}`) !== 'false' : true)
         setUser({ ...userFields, onboarding_completed: onboardingCompleted })
