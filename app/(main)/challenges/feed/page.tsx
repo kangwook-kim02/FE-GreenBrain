@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import SkeletonCard from '@/components/SkeletonCard'
 import EmptyState from '@/components/EmptyState'
 import { useApp } from '@/contexts/AppContext'
-import { apiFetch } from '@/lib/api'
+import { apiFetch, fixStorageUrl } from '@/lib/api'
 import { useSidebar } from '@/contexts/SidebarContext'
 
 interface FeedItem {
@@ -98,7 +98,7 @@ function FeedCard({
           <div className="flex items-center gap-3">
             {item.profile_image_url ? (
               <img
-                src={item.profile_image_url}
+                src={fixStorageUrl(item.profile_image_url)}
                 alt={item.nickname ?? ''}
                 className="w-9 h-9 rounded-full object-cover bg-gray-100"
               />
@@ -124,7 +124,7 @@ function FeedCard({
 
       <div className="relative">
         <img
-          src={item.photo_url}
+          src={fixStorageUrl(item.photo_url)}
           alt={item.title}
           className="w-full aspect-square object-cover bg-gray-100"
         />
