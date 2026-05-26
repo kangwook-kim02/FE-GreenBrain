@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/uploads/:path*',
-        destination: `${process.env.BACKEND_URL}/uploads/:path*`,
+        destination: `${process.env.STORAGE_URL || `${process.env.BACKEND_URL}/uploads`}/:path*`,
       },
     ]
   },
