@@ -84,9 +84,7 @@ export default function ChallengeModal({ open, onClose, onReward }: ChallengeMod
             setChallenge(genRes.challenge)
           } catch (genErr) {
             const status = (genErr as { status?: number }).status
-            if (status === 409) {
-              setError('토큰이 남아있어 챌린지를 생성할 수 없습니다.')
-            } else if (status === 429) {
+            if (status === 429) {
               setDailyCount(3)
             } else {
               setError('챌린지를 불러올 수 없습니다.')
