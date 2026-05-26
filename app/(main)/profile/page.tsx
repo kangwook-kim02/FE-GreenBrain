@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import OnboardingIcon from '@/components/icons/OnboardingIcons'
 import type { OnboardingIconName } from '@/components/icons/OnboardingIcons'
 import { useApp } from '@/contexts/AppContext'
-import { apiFetch } from '@/lib/api'
+import { apiFetch, fixStorageUrl } from '@/lib/api'
 import { useSidebar } from '@/contexts/SidebarContext'
 
 const TRANSPORT_OPTIONS = [
@@ -300,7 +300,7 @@ export default function ProfilePage() {
 
   const nickname = user?.nickname ?? ''
   const email = user?.email ?? ''
-  const profileImageUrl = avatarPreview ?? user?.profile_image_url
+  const profileImageUrl = avatarPreview ?? fixStorageUrl(user?.profile_image_url)
 
   const currentTransport = findOption(TRANSPORT_OPTIONS, transportation)
   const currentDiet = findOption(DIET_OPTIONS, diet)

@@ -7,6 +7,11 @@ type FetchOptions = Omit<RequestInit, 'body'> & {
   skipAutoRedirect?: boolean
 }
 
+export function fixStorageUrl(url: string | null): string | null {
+  if (!url) return null
+  return url.replace('greenbrain-uploads/greenbrain-uploads/', 'greenbrain-uploads/')
+}
+
 export async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
   const { body, headers, skipAutoRedirect, ...rest } = options
 
