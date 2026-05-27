@@ -156,7 +156,6 @@ function ChatContent() {
         { method: 'POST', body: { message: text, model_id: selectedModel }, skipAutoRedirect: true }
       )
       updateRemainingTokens(res.tokens_remaining)
-
       setMessages((prev) => [
         ...prev,
         {
@@ -234,7 +233,17 @@ function ChatContent() {
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700">탄소 토큰</span>
               <span className={`text-sm font-bold ${tokens.remaining <= 30 ? 'text-red-500' : 'text-gray-900'}`}>
-                {isTokenLoading ? '...' : `${tokens.remaining} / ${tokens.max} gCO₂eq`}
+                {isTokenLoading ? '...' : (
+                  <>
+                    {Math.round(tokens.remaining)}
+                    {' / '}
+                    {tokens.max}
+                    {tokens.remaining > tokens.max && (
+                      <span className="text-blue-500"> +{Math.round(tokens.remaining - tokens.max)}</span>
+                    )}
+                    {' gCO₂eq'}
+                  </>
+                )}
               </span>
             </div>
             <TokenBar remaining={isTokenLoading ? tokens.max : tokens.remaining} max={tokens.max} />
