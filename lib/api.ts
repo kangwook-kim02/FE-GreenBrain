@@ -7,8 +7,10 @@ type FetchOptions = Omit<RequestInit, 'body'> & {
   skipAutoRedirect?: boolean
 }
 
-export function fixStorageUrl(url: string | null): string | null {
-  if (!url) return null
+export function fixStorageUrl(url: string): string
+export function fixStorageUrl(url: string | null | undefined): string | undefined
+export function fixStorageUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined
   return url.replace('greenbrain-uploads/greenbrain-uploads/', 'greenbrain-uploads/')
 }
 
