@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Geist } from 'next/font/google'
 import './globals.css'
+import 'katex/dist/katex.min.css'
 import { Toaster } from 'sonner'
 import { AppProvider } from '@/contexts/AppContext'
 import RouteGuard from '@/components/RouteGuard'
