@@ -31,7 +31,7 @@ export function parseModel(value: string): Model {
 }
 
 export function useModels() {
-  const { data, error, isLoading } = useSWR<{ success: boolean; message: string; data: { items: string[] } }>(
+  const { data, error, isLoading } = useSWR<{ items: string[] }>(
     '/api/chat/models',
     fetcher,
     {
@@ -42,10 +42,9 @@ export function useModels() {
     }
   )
 
-  const models = data?.data?.items
+  const models = data?.items
     .filter((v) => !EXCLUDED_PROVIDERS.some((p) => v.startsWith(`${p}/`)))
     .map(parseModel) ?? []
-
   return {
     models,
     isModelsLoading: isLoading,
